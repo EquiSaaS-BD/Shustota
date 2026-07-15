@@ -5,10 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, Toaster } from "sonner";
-import { User, Stethoscope, Building2, CheckCircle2, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { User, Stethoscope, Building2, CheckCircle2, Eye, EyeOff, ArrowLeft, ChevronDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
-type AccountType = "patient" | "doctor" | "hospital" | null;
+type AccountType = "patient" | "doctor" | "hospital" | "assistant" | null;
 
 interface FormData {
   accountType: AccountType;
@@ -24,6 +24,11 @@ interface FormData {
   doctorMobile: string;
   doctorRegNo: string;
   doctorSpec: string;
+  // Assistant fields
+  assistantFullName: string;
+  assistantEmail: string;
+  assistantMobile: string;
+  assistantInviteCode: string;
   // Hospital fields
   hospitalName: string;
   hospitalEmail: string;
@@ -37,9 +42,10 @@ interface FormData {
 }
 
 const ACCOUNT_TYPES = [
-  { value: "patient" as const, label: "Patient", icon: User },
-  { value: "doctor" as const, label: "Doctor", icon: Stethoscope },
-  { value: "hospital" as const, label: "Hospital", icon: Building2 },
+  { value: "patient" as const, label: "Patient", desc: "Book appointments and manage health", icon: User },
+  { value: "doctor" as const, label: "Doctor", desc: "Manage clinic and patient records", icon: Stethoscope },
+  { value: "assistant" as const, label: "Doctor Assistant", desc: "Manage queues and chamber ops", icon: Eye },
+  { value: "hospital" as const, label: "Hospital", desc: "Enterprise facility management", icon: Building2 },
 ];
 
 const InputField = ({ label, id, type = "text", required = false, isHalf = false, rightElement, error, ...props }: any) => (
@@ -49,16 +55,21 @@ const InputField = ({ label, id, type = "text", required = false, isHalf = false
     </label>
     <div className="relative">
       {type === "select" ? (
-        <select
-          id={id}
-          className={`w-full h-[52px] rounded-xl px-4 border-2 transition-all outline-none bg-transparent appearance-none ${error ? "border-red-400 focus:border-red-500 bg-red-50" : "border-slate-200 focus:border-[#70DE71] hover:border-slate-300"}`}
-          {...props}
-        >
-          <option value="">Select...</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
+        <>
+          <select
+            id={id}
+            className={`w-full h-[52px] rounded-xl pl-4 pr-10 border-2 transition-all outline-none bg-transparent appearance-none cursor-pointer ${error ? "border-red-400 focus:border-red-500 bg-red-50" : "border-slate-200 focus:border-[#70DE71] hover:border-slate-300"}`}
+            {...props}
+          >
+            <option value="" disabled>Select...</option>
+            {props.options?.map((opt: string) => (
+              <option key={opt} value={opt} className="text-slate-700 py-2">{opt}</option>
+            ))}
+          </select>
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+            <ChevronDown size={20} />
+          </div>
+        </>
       ) : (
         <input
           id={id}
@@ -91,6 +102,7 @@ export default function RegisterPage() {
     accountType: null,
     patientFullName: "", patientEmail: "", patientMobile: "", patientDob: "", patientGender: "",
     doctorFullName: "", doctorEmail: "", doctorMobile: "", doctorRegNo: "", doctorSpec: "",
+    assistantFullName: "", assistantEmail: "", assistantMobile: "", assistantInviteCode: "",
     hospitalName: "", hospitalEmail: "", hospitalPhone: "", hospitalRegNo: "", hospitalAddress: "",
     password: "", confirmPassword: "", agreeTerms: false,
   });
@@ -116,6 +128,10 @@ export default function RegisterPage() {
       if (!formData.doctorMobile.trim()) errs.doctorMobile = "Required";
       if (!formData.doctorRegNo.trim()) errs.doctorRegNo = "Required";
       if (!formData.doctorSpec.trim()) errs.doctorSpec = "Required";
+    } else if (formData.accountType === "assistant") {
+      if (!formData.assistantFullName.trim()) errs.assistantFullName = "Required";
+      if (!formData.assistantEmail.trim() || !isValidEmail(formData.assistantEmail)) errs.assistantEmail = "Valid email required";
+      if (!formData.assistantMobile.trim()) errs.assistantMobile = "Required";
     } else if (formData.accountType === "hospital") {
       if (!formData.hospitalName.trim()) errs.hospitalName = "Required";
       if (!formData.hospitalEmail.trim() || !isValidEmail(formData.hospitalEmail)) errs.hospitalEmail = "Valid email required";
@@ -169,9 +185,15 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen bg-white flex flex-col items-center py-10 px-4 sm:px-6">
-      <Toaster position="top-center" />
-      
-      {/* Logo */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-[700px] flex flex-col items-center relative"
+      >
+        <Toaster position="top-center" />
+        
+        {/* Logo */}
       <Link href="/" className="mb-12">
         <Image src="/images/shustota ai logo.png" alt="Shustota AI" width={400} height={140} className="h-28 sm:h-32 w-auto object-contain" />
       </Link>
@@ -204,27 +226,28 @@ export default function RegisterPage() {
             <motion.div key="step1" custom={direction} variants={slideVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-center">
               <h1 className="text-2xl font-bold text-slate-800 mb-8 uppercase tracking-wide">Step 1 - Who Are You?</h1>
               
-              <div className="w-full flex flex-col sm:flex-row gap-5 justify-center mb-10">
+              <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-5 justify-items-center mb-10 max-w-[680px]">
                 {ACCOUNT_TYPES.map((type) => {
                   const isSelected = formData.accountType === type.value;
                   return (
                     <button
                       key={type.value}
                       onClick={() => updateForm("accountType", type.value)}
-                      className={`relative flex flex-col items-center justify-center gap-4 rounded-[16px] border-2 transition-all p-6 cursor-pointer overflow-hidden
-                        w-full sm:w-[200px] lg:w-[220px] h-[160px] sm:h-[170px] lg:h-[180px]
-                        ${isSelected ? "border-[#70DE71] bg-[#70DE71]/5 shadow-[0_4px_20px_rgba(112,222,113,0.15)]" : "border-slate-200 bg-white hover:border-[#70DE71]/50 shadow-sm"}
+                      className={`relative flex flex-col items-center justify-center gap-3 rounded-[20px] border-2 transition-all p-4 cursor-pointer overflow-hidden
+                        w-[320px] h-[180px]
+                        ${isSelected ? "border-[#70DE71] bg-[#70DE71]/5 shadow-[0_8px_30px_rgba(112,222,113,0.2)]" : "border-slate-200 bg-white hover:border-[#70DE71]/50 shadow-sm hover:shadow-md"}
                       `}
                     >
                       {isSelected && (
-                        <div className="absolute top-3 right-3 text-[#70DE71]">
-                          <CheckCircle2 size={20} className="fill-[#70DE71]/20" />
+                        <div className="absolute top-4 right-4 text-[#70DE71]">
+                          <CheckCircle2 size={24} className="fill-[#70DE71]/20" />
                         </div>
                       )}
                       <div className={`p-4 rounded-full ${isSelected ? "bg-[#70DE71] text-white" : "bg-slate-100 text-slate-500 transition-colors group-hover:bg-[#70DE71]/10"}`}>
-                        <type.icon size={32} />
+                        <type.icon size={40} />
                       </div>
-                      <span className={`font-bold text-lg ${isSelected ? "text-slate-800" : "text-slate-500"}`}>{type.label}</span>
+                      <span className={`font-bold text-[22px] ${isSelected ? "text-slate-800" : "text-slate-600"}`}>{type.label}</span>
+                      <span className={`text-[15px] font-medium text-center px-4 ${isSelected ? "text-slate-600" : "text-slate-500"}`}>{type.desc}</span>
                     </button>
                   );
                 })}
@@ -257,7 +280,7 @@ export default function RegisterPage() {
                     <InputField error={errors["patientEmail"]} id="patientEmail" label="Email Address" type="email" required isHalf value={formData.patientEmail} onChange={(e: any) => updateForm("patientEmail", e.target.value)} />
                     <InputField error={errors["patientMobile"]} id="patientMobile" label="Mobile Number" type="tel" required isHalf value={formData.patientMobile} onChange={(e: any) => updateForm("patientMobile", e.target.value)} />
                     <InputField error={errors["patientDob"]} id="patientDob" label="Date of Birth" type="date" isHalf value={formData.patientDob} onChange={(e: any) => updateForm("patientDob", e.target.value)} />
-                    <InputField error={errors["patientGender"]} id="patientGender" label="Gender" type="select" isHalf value={formData.patientGender} onChange={(e: any) => updateForm("patientGender", e.target.value)} />
+                    <InputField error={errors["patientGender"]} id="patientGender" label="Gender" type="select" options={["Male", "Female", "Other"]} isHalf value={formData.patientGender} onChange={(e: any) => updateForm("patientGender", e.target.value)} />
                     <div className="col-span-2 mt-2 bg-slate-50 p-4 rounded-[16px] border border-slate-100 shadow-sm">
                       <p className="text-sm text-slate-500 font-medium leading-relaxed">
                         <span className="font-bold text-slate-700">Note:</span> Blood Group, Address, Emergency Contact, Medical History and other profile information can be updated later from Profile Settings.
@@ -272,10 +295,24 @@ export default function RegisterPage() {
                     <InputField error={errors["doctorEmail"]} id="doctorEmail" label="Email Address" type="email" required isHalf value={formData.doctorEmail} onChange={(e: any) => updateForm("doctorEmail", e.target.value)} />
                     <InputField error={errors["doctorMobile"]} id="doctorMobile" label="Mobile Number" type="tel" required isHalf value={formData.doctorMobile} onChange={(e: any) => updateForm("doctorMobile", e.target.value)} />
                     <InputField error={errors["doctorRegNo"]} id="doctorRegNo" label="Medical Registration Number" required isHalf value={formData.doctorRegNo} onChange={(e: any) => updateForm("doctorRegNo", e.target.value)} />
-                    <InputField error={errors["doctorSpec"]} id="doctorSpec" label="Specialization" required value={formData.doctorSpec} onChange={(e: any) => updateForm("doctorSpec", e.target.value)} />
+                    <InputField error={errors["doctorSpec"]} id="doctorSpec" label="Specialization" type="select" options={["General Physician", "Cardiologist", "Dermatologist", "Endocrinologist", "Gastroenterologist", "Gynecologist", "Neurologist", "Orthopedist", "Pediatrician", "Psychiatrist", "Dentist", "ENT Specialist", "Other"]} required value={formData.doctorSpec} onChange={(e: any) => updateForm("doctorSpec", e.target.value)} />
                     <div className="col-span-2 mt-2 bg-slate-50 p-4 rounded-[16px] border border-slate-100 shadow-sm">
                       <p className="text-sm text-slate-500 font-medium leading-relaxed">
                         <span className="font-bold text-slate-700">Note:</span> Qualification, Experience, Consultation Fee, Profile Photo and Certificates can be added later from Profile Settings.
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {formData.accountType === "assistant" && (
+                  <>
+                    <InputField error={errors["assistantFullName"]} id="assistantFullName" label="Full Name" required isHalf value={formData.assistantFullName} onChange={(e: any) => updateForm("assistantFullName", e.target.value)} />
+                    <InputField error={errors["assistantEmail"]} id="assistantEmail" label="Email Address" type="email" required isHalf value={formData.assistantEmail} onChange={(e: any) => updateForm("assistantEmail", e.target.value)} />
+                    <InputField error={errors["assistantMobile"]} id="assistantMobile" label="Mobile Number" type="tel" required isHalf value={formData.assistantMobile} onChange={(e: any) => updateForm("assistantMobile", e.target.value)} />
+                    <InputField error={errors["assistantInviteCode"]} id="assistantInviteCode" label="Invite Code (Optional)" isHalf value={formData.assistantInviteCode} onChange={(e: any) => updateForm("assistantInviteCode", e.target.value)} />
+                    <div className="col-span-2 mt-2 bg-slate-50 p-4 rounded-[16px] border border-slate-100 shadow-sm">
+                      <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                        <span className="font-bold text-slate-700">Note:</span> If a doctor invited you, entering the invite code will automatically connect you to their chamber.
                       </p>
                     </div>
                   </>
@@ -363,6 +400,7 @@ export default function RegisterPage() {
           Already have an account? <Link href="/login" className="text-[#70DE71] font-bold hover:underline">Log in</Link>
         </p>
       </div>
+      </motion.div>
     </main>
   );
 }

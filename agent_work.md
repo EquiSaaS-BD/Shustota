@@ -1,6 +1,6 @@
 # Handoff & Context Document: Shustota AI
 
-## ১. প্রজেক্টের বর্তমান অবস্থা (Current Project State)
+## ১. প্রজেক্টের বর্তমান অবস্থা (Current Project State) ---- 
 Shustota AI-এর জন্য একটি প্রোডাকশন-গ্রেড, স্কেলেবল এবং সিকিউর ব্যাকএন্ড আর্কিটেকচার তৈরি করার কাজ চলছে। আমরা পুরানো SQLite-ভিত্তিক প্রোটোটাইপ থেকে সরে এসে **FastAPI, PostgreSQL (asyncpg), SQLAlchemy 2.0, এবং JWT-ভিত্তিক Authentication** সমৃদ্ধ একটি এন্টারপ্রাইজ আর্কিটেকচার তৈরি করেছি।
 
 **ফ্রন্টএন্ডের অগ্রগতি:** ফ্রন্টএন্ডে (`Frontend/src/app/(auth)/register/page.tsx`) একটি প্রিমিয়াম, ৩-স্টেপ রেজিস্ট্রেশন ফর্ম এবং (`Frontend/src/app/(auth)/login/page.tsx`) লগইন পেজের UI ডিজাইন সম্পূর্ণ করা হয়েছে। এছাড়াও ল্যান্ডিং পেজে একটি প্রোমোশনাল ডেমো ভিডিও অ্যাড করা হয়েছে। 

@@ -19,6 +19,7 @@ export default function AppLayout({
     pathname === "/doctor" || pathname.startsWith("/doctor/") || 
     pathname === "/hospital" || pathname.startsWith("/hospital/") || 
     pathname === "/admin" || pathname.startsWith("/admin/") || 
+    pathname === "/assistant" || pathname.startsWith("/assistant/") || 
     pathname === "/patient" || pathname.startsWith("/patient/");
 
   return (

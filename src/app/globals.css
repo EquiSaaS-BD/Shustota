@@ -123,6 +123,22 @@
   --shadow-level-3: 0 12px 24px rgba(9, 30, 66, 0.16);
   --shadow-glass: 0 8px 32px 0 rgba(0, 61, 155, 0.05);
 
+  /* --- Assistant Dashboard Colors --- */
+  --color-assistant-primary: #6DDA6E;
+  --color-assistant-secondary: #2F80ED;
+  --color-assistant-accent: #00C2A8;
+  --color-assistant-bg: #F7FAFC;
+  --color-assistant-card: #FFFFFF;
+  --color-assistant-border: #E5E7EB;
+  --color-assistant-success: #22C55E;
+  --color-assistant-warning: #F59E0B;
+  --color-assistant-danger: #EF4444;
+  
+  --radius-assistant-btn: 12px;
+  --radius-assistant-input: 12px;
+  --radius-assistant-card: 20px;
+  --radius-assistant-modal: 24px;
+
   /* --- Animations --- */
   --animate-fade-in-up: fade-in-up 0.6s ease-out forwards;
   --animate-float: float 6s infinite ease-in-out;

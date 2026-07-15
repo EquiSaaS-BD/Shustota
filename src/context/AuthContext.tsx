@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export type UserRole = 'patient' | 'doctor' | 'hospital' | 'admin' | null;
+export type UserRole = 'patient' | 'doctor' | 'hospital' | 'admin' | 'assistant' | null;
 
 interface User {
   id: string;
@@ -54,6 +54,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       router.push('/hospital/dashboard');
     } else if (userData.role === 'admin') {
       router.push('/admin/dashboard');
+    } else if (userData.role === 'assistant') {
+      router.push('/assistant');
     } else {
       router.push('/');
     }

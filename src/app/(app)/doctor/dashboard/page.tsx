@@ -1,350 +1,277 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import {
-  Users,
-  CalendarDays,
-  ClipboardList,
-  Video,
-  Eye,
-  Edit3,
-  FileText,
-  Upload,
-  Send,
-  Clock,
-  MapPin,
-  Wifi,
-  MoreHorizontal,
-  ChevronRight,
-  Activity,
-} from "lucide-react";
-import { toast } from "sonner";
-import { StatsCard } from "@/components/doctor/StatsCard";
-import { DoctorDashboardSkeleton } from "@/components/doctor/DoctorDashboardSkeleton";
-import {
-  doctorStats,
-  recentPatients,
-  todayAppointments,
-  upcomingAppointments,
-} from "@/lib/doctorMockData";
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Users, Clock, MonitorPlay, UserCheck, Activity, Smartphone, Plus, X, ToggleLeft, ToggleRight, QrCode, Mail, Link as LinkIcon } from 'lucide-react';
+import Image from 'next/image';
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08 },
-  },
-};
+const stats = [
+  { title: "Today's Appointments", count: "42", icon: Users, color: "text-[#2F80ED]", bg: "bg-[#2F80ED]/10" },
+  { title: "Patients Waiting", count: "12", icon: Clock, color: "text-[#F59E0B]", bg: "bg-[#F59E0B]/10" },
+  { title: "Completed", count: "18", icon: UserCheck, color: "text-[#22C55E]", bg: "bg-[#22C55E]/10" },
+  { title: "Walk-in Patients", count: "14", icon: Activity, color: "text-[#8B5CF6]", bg: "bg-[#8B5CF6]/10" },
+  { title: "Online Consultations", count: "8", icon: Smartphone, color: "text-[#00C2A8]", bg: "bg-[#00C2A8]/10" },
+  { title: "Revenue", count: "৳28K", icon: MonitorPlay, color: "text-slate-700", bg: "bg-slate-100" },
+];
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-};
+const activityLog = [
+  { time: "09:15", name: "Kamrul Hasan", action: "Checked In", token: "S-021", status: "Completed", color: "text-[#22C55E]" },
+  { time: "09:18", name: "Kamrul Hasan", action: "Called Next Patient", token: "S-022", status: "Completed", color: "text-[#22C55E]" },
+  { time: "09:20", name: "Kamrul Hasan", action: "Rescheduled Appointment", token: "S-025", status: "Completed", color: "text-[#2F80ED]" },
+  { time: "09:25", name: "Aisha Begum", action: "Emergency Case Inserted", token: "E-01", status: "Alert", color: "text-[#EF4444]" },
+  { time: "09:30", name: "Kamrul Hasan", action: "Payment Collected", token: "S-022", status: "Completed", color: "text-[#22C55E]" },
+  { time: "09:45", name: "Kamrul Hasan", action: "Paused Queue", token: "-", status: "Warning", color: "text-[#F59E0B]" },
+  { time: "10:00", name: "Kamrul Hasan", action: "Resumed Queue", token: "-", status: "Completed", color: "text-[#22C55E]" },
+];
 
 export default function DoctorDashboardPage() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [permissions, setPermissions] = useState({
+    apt: true, queue: true, walkin: true, pay: true, notif: true, cal: true, 
+    sched: true, checkin: true, report: true, analytics: true,
+    presc: false, diag: false, medrec: false, docprof: false
+  });
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) return <DoctorDashboardSkeleton />;
-
-  const statsConfig = [
-    {
-      label: "Total Patients",
-      value: doctorStats.totalPatients.toLocaleString(),
-      change: doctorStats.totalPatientsChange,
-      icon: Users,
-      accentColor: "#003d9b",
-      iconBgColor: "#eef2ff",
-    },
-    {
-      label: "Today's Appointments",
-      value: doctorStats.todayAppointments,
-      change: doctorStats.todayAppointmentsChange,
-      icon: CalendarDays,
-      accentColor: "#0891b2",
-      iconBgColor: "#ecfeff",
-    },
-    {
-      label: "Pending Prescriptions",
-      value: doctorStats.pendingPrescriptions,
-      change: doctorStats.pendingPrescriptionsChange,
-      icon: ClipboardList,
-      accentColor: "#d97706",
-      iconBgColor: "#fffbeb",
-    },
-    {
-      label: "Upcoming Consultations",
-      value: doctorStats.upcomingConsultations,
-      change: doctorStats.upcomingConsultationsChange,
-      icon: Video,
-      accentColor: "#059669",
-      iconBgColor: "#ecfdf5",
-    },
-  ];
-
-  const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      Stable: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      "Follow-up": "bg-amber-50 text-amber-700 border-amber-200",
-      Critical: "bg-red-50 text-red-600 border-red-200",
-      New: "bg-blue-50 text-blue-600 border-blue-200",
-    };
-    return (
-      <span className={`text-[11.5px] font-semibold px-2.5 py-1 rounded-full border ${styles[status] || "bg-slate-50 text-slate-600 border-slate-200"}`}>
-        {status}
-      </span>
-    );
-  };
-
-  const getAppointmentStatusDot = (status: string) => {
-    const colors: Record<string, string> = {
-      Confirmed: "bg-emerald-400",
-      Pending: "bg-amber-400",
-      Completed: "bg-slate-300",
-      Cancelled: "bg-red-400",
-    };
-    return <span className={`w-2 h-2 rounded-full ${colors[status] || "bg-slate-300"}`} />;
-  };
-
-  const getTypeBadge = (type: string) => {
-    return type === "Online" ? (
-      <span className="flex items-center gap-1 text-[11px] font-medium text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded-full">
-        <Wifi size={10} /> Online
-      </span>
-    ) : (
-      <span className="flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
-        <MapPin size={10} /> In-person
-      </span>
-    );
+  const togglePermission = (key: keyof typeof permissions) => {
+    setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="p-4 lg:p-6 space-y-6"
-    >
-      {/* Page Header */}
-      <motion.div variants={itemVariants}>
-        <h1 className="text-xl lg:text-2xl font-bold text-slate-800">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">Welcome back! Here&apos;s your practice overview for today.</p>
-      </motion.div>
-
-      {/* Stats Cards */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statsConfig.map((stat) => (
-          <StatsCard key={stat.label} {...stat} />
-        ))}
-      </motion.div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Recent Patients Table */}
-        <motion.div variants={itemVariants} className="xl:col-span-2 bg-white rounded-xl border border-slate-200/80 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <Users size={16} className="text-primary" />
-              <h3 className="text-sm font-semibold text-slate-800">Recent Patients</h3>
-              <span className="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                {recentPatients.length}
-              </span>
-            </div>
-            <button className="text-[13px] text-primary font-medium hover:underline flex items-center gap-1">
-              View All <ChevronRight size={14} />
-            </button>
+    <div className="p-4 lg:p-6 space-y-6 bg-slate-50 min-h-[calc(100vh-80px)] w-full max-w-[1600px] mx-auto overflow-y-auto">
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-[24px] font-bold text-slate-800">Live Monitor & Team Dashboard</h1>
+        <div className="flex gap-4">
+          <div className="px-4 py-2 bg-white rounded-full shadow-sm flex items-center gap-2 border border-slate-100">
+            <span className="w-2.5 h-2.5 bg-[#22C55E] rounded-full animate-pulse"></span>
+            <span className="text-[14px] font-bold text-slate-700 hidden sm:inline">Live Sync Active</span>
           </div>
-
-          {/* Table Header */}
-          <div className="hidden md:grid grid-cols-[2fr_1fr_1.2fr_0.8fr_0.8fr] gap-4 px-5 py-2.5 bg-slate-50/80 text-[11.5px] font-semibold text-slate-500 uppercase tracking-wider">
-            <span>Patient</span>
-            <span>Last Visit</span>
-            <span>Condition</span>
-            <span>Status</span>
-            <span className="text-right">Actions</span>
-          </div>
-
-          {/* Table Rows */}
-          <div className="divide-y divide-slate-100">
-            {recentPatients.map((patient) => (
-              <div
-                key={patient.id}
-                className="table-row-hover grid grid-cols-1 md:grid-cols-[2fr_1fr_1.2fr_0.8fr_0.8fr] gap-2 md:gap-4 items-center px-5 py-3.5 cursor-pointer"
-              >
-                {/* Patient Info */}
-                <div className="flex items-center gap-3">
-                  <img
-                    src={patient.avatar}
-                    alt={patient.name}
-                    className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-100"
-                  />
-                  <div>
-                    <p className="text-[13px] font-semibold text-slate-800">{patient.name}</p>
-                    <p className="text-[11.5px] text-slate-400">{patient.age}y • {patient.gender}</p>
-                  </div>
-                </div>
-
-                {/* Last Visit */}
-                <div className="hidden md:block">
-                  <p className="text-[13px] text-slate-600">
-                    {new Date(patient.lastVisit).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                  </p>
-                </div>
-
-                {/* Condition */}
-                <div className="hidden md:block">
-                  <p className="text-[13px] text-slate-600">{patient.condition}</p>
-                </div>
-
-                {/* Status */}
-                <div className="hidden md:flex">
-                  {getStatusBadge(patient.status)}
-                </div>
-
-                {/* Actions */}
-                <div className="hidden md:flex items-center justify-end gap-1.5">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); toast.info(`Viewing ${patient.name}'s profile`); }}
-                    className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/8 rounded-lg transition-colors"
-                    title="View Patient"
-                  >
-                    <Eye size={15} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); toast.info(`Editing ${patient.name}'s record`); }}
-                    className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors"
-                    title="Edit Patient"
-                  >
-                    <Edit3 size={15} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Today's Appointments */}
-        <motion.div variants={itemVariants} className="bg-white rounded-xl border border-slate-200/80 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <CalendarDays size={16} className="text-cyan-600" />
-              <h3 className="text-sm font-semibold text-slate-800">Today&apos;s Appointments</h3>
-            </div>
-            <span className="text-[11px] font-bold text-white bg-cyan-500 w-5.5 h-5.5 rounded-full flex items-center justify-center">
-              {todayAppointments.length}
-            </span>
-          </div>
-
-          <div className="divide-y divide-slate-50 max-h-[400px] overflow-y-auto scrollbar-thin">
-            {todayAppointments.map((appt) => (
-              <div
-                key={appt.id}
-                className="px-5 py-3.5 hover:bg-slate-50/50 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <img
-                    src={appt.patientAvatar}
-                    alt={appt.patientName}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-slate-800 truncate">{appt.patientName}</p>
-                    <p className="text-[11.5px] text-slate-400">{appt.condition}</p>
-                  </div>
-                  <button className="p-1 text-slate-300 hover:text-slate-500 transition-colors">
-                    <MoreHorizontal size={16} />
-                  </button>
-                </div>
-                <div className="flex items-center gap-2 ml-11">
-                  <span className="flex items-center gap-1.5 text-[11.5px] text-slate-500">
-                    <Clock size={11} />
-                    {appt.time}
-                  </span>
-                  {getTypeBadge(appt.type)}
-                  <span className="flex items-center gap-1 text-[11px] text-slate-400 ml-auto">
-                    {getAppointmentStatusDot(appt.status)}
-                    {appt.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Upcoming Section */}
-          <div className="border-t border-slate-200">
-            <div className="px-5 py-3 bg-slate-50/50">
-              <p className="text-[11.5px] font-semibold text-slate-500 uppercase tracking-wider">Upcoming</p>
-            </div>
-            <div className="divide-y divide-slate-50">
-              {upcomingAppointments.slice(0, 2).map((appt) => (
-                <div key={appt.id} className="px-5 py-3 hover:bg-slate-50/50 transition-colors cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={appt.patientAvatar}
-                      alt={appt.patientName}
-                      className="w-7 h-7 rounded-full object-cover opacity-80"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12.5px] font-medium text-slate-700 truncate">{appt.patientName}</p>
-                      <p className="text-[11px] text-slate-400">
-                        {new Date(appt.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} • {appt.time}
-                      </p>
-                    </div>
-                    {getTypeBadge(appt.type)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Quick Actions */}
-      <motion.div variants={itemVariants}>
-        <h3 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
-          <Activity size={15} className="text-primary" />
-          Quick Actions
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <button
-            onClick={() => toast.success("Prescription editor opening...", { description: "Feature coming soon" })}
-            className="quick-action-card bg-white rounded-xl border border-slate-200/80 p-5 text-left group"
+      {/* STATS */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-6">
+        {stats.map((stat, idx) => (
+          <motion.div 
+            key={idx}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            className="h-[140px] bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow"
           >
-            <div className="w-11 h-11 rounded-xl bg-primary/8 flex items-center justify-center mb-3 group-hover:bg-primary/12 transition-colors">
-              <FileText size={20} className="text-primary" />
+            <div className="flex justify-between items-start">
+              <div className={`w-[40px] h-[40px] rounded-[12px] flex items-center justify-center ${stat.bg}`}>
+                <stat.icon size={20} className={stat.color} />
+              </div>
             </div>
-            <p className="text-sm font-semibold text-slate-800">Write Prescription</p>
-            <p className="text-[12px] text-slate-400 mt-1">Create a new prescription for a patient</p>
-          </button>
+            <div>
+              <h3 className="text-[34px] font-bold text-slate-800 leading-none mb-1">{stat.count}</h3>
+              <p className="text-[14px] font-medium text-slate-500">{stat.title}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
 
-          <button
-            onClick={() => toast.success("Upload dialog opening...", { description: "Feature coming soon" })}
-            className="quick-action-card bg-white rounded-xl border border-slate-200/80 p-5 text-left group"
-          >
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center mb-3 group-hover:bg-emerald-100 transition-colors">
-              <Upload size={20} className="text-emerald-600" />
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Main Queue Progress */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="xl:col-span-2 bg-white rounded-[20px] shadow-sm border border-slate-100 p-6 lg:p-8 flex flex-col gap-8"
+        >
+          <div className="flex justify-between items-end">
+            <div className="w-full">
+              <h2 className="text-[20px] font-bold text-slate-800 mb-3">Current Queue Progress</h2>
+              <div className="w-full max-w-[400px] h-[12px] bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-[#2F80ED] rounded-full w-[45%]"></div>
+              </div>
+              <p className="text-[13px] text-slate-500 mt-2">18 of 42 patients completed</p>
             </div>
-            <p className="text-sm font-semibold text-slate-800">Upload Report</p>
-            <p className="text-[12px] text-slate-400 mt-1">Upload lab results or diagnostic reports</p>
-          </button>
+            <div className="text-right whitespace-nowrap">
+              <p className="text-[14px] text-slate-500 font-medium">Est. Waiting Time</p>
+              <p className="text-[24px] font-bold text-[#F59E0B]">~45 mins</p>
+            </div>
+          </div>
 
-          <button
-            onClick={() => toast.success("Message composer opening...", { description: "Feature coming soon" })}
-            className="quick-action-card bg-white rounded-xl border border-slate-200/80 p-5 text-left group"
-          >
-            <div className="w-11 h-11 rounded-xl bg-cyan-50 flex items-center justify-center mb-3 group-hover:bg-cyan-100 transition-colors">
-              <Send size={20} className="text-cyan-600" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-[#F7FAFC] p-6 rounded-[16px] border border-slate-100 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button className="text-[12px] bg-white border border-slate-200 shadow-sm px-3 py-1 rounded-full text-slate-600 font-medium hover:text-[#2F80ED] hover:border-[#2F80ED]">View Details</button>
+              </div>
+              <span className="text-[14px] text-slate-500 font-semibold uppercase tracking-wider">Current Patient</span>
+              <div className="mt-4 flex items-center justify-between">
+                <div>
+                  <span className="text-[54px] font-extrabold text-[#2F80ED] leading-none block mb-2">S-01</span>
+                  <span className="text-[18px] font-bold text-slate-800">Rahim Uddin</span>
+                  <p className="text-[14px] text-slate-500">First Visit • Fever, Cough</p>
+                </div>
+                <div className="w-[70px] h-[70px] rounded-full bg-[#2F80ED]/10 hidden sm:flex items-center justify-center text-[24px] font-bold text-[#2F80ED]">R</div>
+              </div>
             </div>
-            <p className="text-sm font-semibold text-slate-800">Send Message</p>
-            <p className="text-[12px] text-slate-400 mt-1">Contact a patient or colleague directly</p>
-          </button>
+
+            <div className="bg-white p-6 rounded-[16px] border border-slate-200">
+              <span className="text-[14px] text-slate-500 font-semibold uppercase tracking-wider">Next Patient</span>
+              <div className="mt-4 flex items-center justify-between">
+                <div>
+                  <span className="text-[40px] font-bold text-slate-400 leading-none block mb-2">S-02</span>
+                  <span className="text-[16px] font-bold text-slate-700">Fatema Begum</span>
+                  <p className="text-[14px] text-slate-500">Follow Up • Headache</p>
+                </div>
+                <div className="w-[60px] h-[60px] rounded-full bg-slate-100 hidden sm:flex items-center justify-center text-[20px] font-bold text-slate-500">F</div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Connect Team */}
+        <div className="flex flex-col gap-6">
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-white rounded-[20px] shadow-sm border border-slate-100 p-6 flex flex-col h-full"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-[18px] font-bold text-slate-800">Connected Assistant</h3>
+              <button onClick={() => setShowInviteModal(true)} className="px-4 py-2 bg-[#2F80ED]/10 text-[#2F80ED] text-sm font-bold rounded-lg hover:bg-[#2F80ED] hover:text-white transition-colors flex items-center gap-1.5">
+                <Plus size={16} /> Invite
+              </button>
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between bg-slate-50 p-4 rounded-[12px] border border-slate-100 group transition-colors hover:border-slate-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-[40px] h-[40px] rounded-full bg-[#6DDA6E]/20 text-[#6DDA6E] font-bold flex items-center justify-center text-sm shrink-0">K</div>
+                  <div>
+                    <h4 className="text-[15px] font-bold text-slate-800 leading-tight">Kamrul Hasan</h4>
+                    <span className="text-[13px] text-[#22C55E] font-medium flex items-center gap-1.5 mt-0.5"><span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse"></span> Online (Front Desk)</span>
+                  </div>
+                </div>
+                <button className="text-[12px] font-bold text-[#EF4444] opacity-0 group-hover:opacity-100 transition-opacity bg-red-50 px-3 py-1.5 rounded-lg">Remove</button>
+              </div>
+              <div className="flex items-center justify-between bg-white p-4 rounded-[12px] border border-slate-100 group transition-colors hover:border-slate-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-[40px] h-[40px] rounded-full bg-slate-200 text-slate-500 font-bold flex items-center justify-center text-sm shrink-0">A</div>
+                  <div>
+                    <h4 className="text-[15px] font-bold text-slate-700 leading-tight">Aisha Begum</h4>
+                    <span className="text-[13px] text-slate-400 font-medium mt-0.5 block">Offline (Shift ended)</span>
+                  </div>
+                </div>
+                <button className="text-[12px] font-bold text-[#EF4444] opacity-0 group-hover:opacity-100 transition-opacity bg-red-50 px-3 py-1.5 rounded-lg">Remove</button>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+
+      {/* Assistant Activity Log */}
+      <h2 className="text-[20px] font-bold text-slate-800 pt-4">Live Assistant Activity Log</h2>
+      <div className="w-full bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden">
+        <div className="h-[400px] overflow-y-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse min-w-[700px]">
+            <thead className="sticky top-0 bg-slate-50/90 backdrop-blur-md z-10 border-b border-slate-200">
+              <tr className="text-[13px] text-slate-500 font-semibold h-[50px] uppercase tracking-wider">
+                <th className="px-6 py-3 font-semibold">Time</th>
+                <th className="px-6 py-3 font-semibold">Assistant Name</th>
+                <th className="px-6 py-3 font-semibold">Action</th>
+                <th className="px-6 py-3 font-semibold">Patient Token</th>
+                <th className="px-6 py-3 font-semibold text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody className="text-[14px]">
+              {activityLog.map((log, i) => (
+                <tr key={i} className="border-b border-slate-100 hover:bg-slate-50 transition-colors h-[56px]">
+                  <td className="px-6 py-3 font-medium text-slate-500 whitespace-nowrap">{log.time}</td>
+                  <td className="px-6 py-3 font-semibold text-slate-700 flex items-center gap-3 whitespace-nowrap">
+                    <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[11px] font-bold shrink-0">{log.name.charAt(0)}</div>
+                    {log.name}
+                  </td>
+                  <td className="px-6 py-3 font-medium text-slate-800 whitespace-nowrap">{log.action}</td>
+                  <td className="px-6 py-3 font-bold text-slate-700 whitespace-nowrap">{log.token}</td>
+                  <td className={`px-6 py-3 font-bold text-right whitespace-nowrap ${log.color}`}>{log.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Invite Modal */}
+      <AnimatePresence>
+        {showInviteModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="w-full max-w-[720px] bg-white rounded-[24px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              <div className="px-6 md:px-8 py-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10 shrink-0">
+                <h2 className="text-[20px] font-bold text-slate-800">Invite Assistant</h2>
+                <button onClick={() => setShowInviteModal(false)} className="p-2 text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-6 md:p-8 overflow-y-auto custom-scrollbar">
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="col-span-2 md:col-span-1">
+                    <label className="text-[13px] font-semibold text-slate-700 block mb-1.5">Assistant Name *</label>
+                    <input type="text" className="w-full h-[50px] border border-slate-200 rounded-[12px] px-4 text-[14px] focus:outline-none focus:border-[#2F80ED]" />
+                  </div>
+                  <div className="col-span-2 md:col-span-1">
+                    <label className="text-[13px] font-semibold text-slate-700 block mb-1.5">Email Address *</label>
+                    <input type="email" className="w-full h-[50px] border border-slate-200 rounded-[12px] px-4 text-[14px] focus:outline-none focus:border-[#2F80ED]" />
+                  </div>
+                  <div className="col-span-2 md:col-span-1">
+                    <label className="text-[13px] font-semibold text-slate-700 block mb-1.5">Phone Number *</label>
+                    <input type="tel" className="w-full h-[50px] border border-slate-200 rounded-[12px] px-4 text-[14px] focus:outline-none focus:border-[#2F80ED]" />
+                  </div>
+                  <div className="col-span-2 md:col-span-1">
+                    <label className="text-[13px] font-semibold text-slate-700 block mb-1.5">Role *</label>
+                    <select className="w-full h-[50px] border border-slate-200 rounded-[12px] px-4 text-[14px] focus:outline-none focus:border-[#2F80ED] bg-white appearance-none">
+                      <option>Front Desk / Receptionist</option>
+                      <option>Clinic Manager</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <h3 className="text-[16px] font-bold text-slate-800 mb-3">Permissions</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 bg-slate-50 p-5 rounded-[16px] border border-slate-100">
+                    <div className="col-span-1 md:col-span-2"><h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Management</h4></div>
+                    <PermissionToggle label="Appointment Mgmt" active={permissions.apt} onClick={() => togglePermission('apt')} />
+                    <PermissionToggle label="Queue Management" active={permissions.queue} onClick={() => togglePermission('queue')} />
+                    <PermissionToggle label="Walk-in Patients" active={permissions.walkin} onClick={() => togglePermission('walkin')} />
+                    <PermissionToggle label="Payments" active={permissions.pay} onClick={() => togglePermission('pay')} />
+                    
+                    <div className="col-span-1 md:col-span-2 mt-2"><h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Clinical (Disabled by default)</h4></div>
+                    <PermissionToggle label="Prescriptions" active={permissions.presc} onClick={() => togglePermission('presc')} />
+                    <PermissionToggle label="Medical Records" active={permissions.medrec} onClick={() => togglePermission('medrec')} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 md:px-8 py-5 border-t border-slate-100 bg-white shrink-0 flex justify-end gap-3 sticky bottom-0">
+                <button onClick={() => setShowInviteModal(false)} className="px-6 py-2.5 rounded-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition-colors">Cancel</button>
+                <button onClick={() => setShowInviteModal(false)} className="px-8 py-2.5 bg-[#2F80ED] hover:bg-[#2563EB] text-white rounded-[12px] font-bold shadow-[0_4px_12px_rgba(47,128,237,0.3)] transition-all flex items-center gap-2">
+                  <Mail size={18} /> Send Invite
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
+
+const PermissionToggle = ({ label, active, onClick }: { label: string, active: boolean, onClick: () => void }) => {
+  return (
+    <div className="flex items-center justify-between py-1 cursor-pointer group" onClick={onClick}>
+      <span className="text-[14px] font-medium text-slate-700 group-hover:text-slate-900 transition-colors">{label}</span>
+      <button className="text-slate-400 focus:outline-none">
+        {active ? <ToggleRight size={32} className="text-[#2F80ED]" strokeWidth={1.5} /> : <ToggleLeft size={32} strokeWidth={1.5} />}
+      </button>
+    </div>
+  );
+};
