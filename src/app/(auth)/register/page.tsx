@@ -168,12 +168,47 @@ export default function RegisterPage() {
   const handleSubmit = async () => {
     if (!validateStep3()) return;
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+    
+    const name = formData.accountType === "patient" ? formData.patientFullName 
+               : formData.accountType === "doctor" ? formData.doctorFullName 
+               : formData.accountType === "assistant" ? formData.assistantFullName 
+               : formData.hospitalName;
+               
+    const email = formData.accountType === "patient" ? formData.patientEmail 
+                : formData.accountType === "doctor" ? formData.doctorEmail 
+                : formData.accountType === "assistant" ? formData.assistantEmail 
+                : formData.hospitalEmail;
+
+    // Check localStorage DB
+    const existingUsersStr = localStorage.getItem('shustota_users');
+    const existingUsers = existingUsersStr ? JSON.parse(existingUsersStr) : [];
+    
+    if (existingUsers.some((u: any) => u.email === email)) {
+      setIsLoading(false);
+      toast.error("This email is already registered. Please login.", {
+        style: { background: '#EF4444', color: '#fff', border: 'none' }
+      });
+      return;
+    }
+
+    await new Promise((r) => setTimeout(r, 1500)); // simulate network
+
+    // Save new user
+    const newUser = {
+      id: Date.now().toString(),
+      name,
+      email,
+      role: formData.accountType,
+      password: formData.password
+    };
+    
+    existingUsers.push(newUser);
+    localStorage.setItem('shustota_users', JSON.stringify(existingUsers));
+
     toast.success("Account created successfully!");
     await new Promise((r) => setTimeout(r, 800));
-    const name = formData.accountType === "patient" ? formData.patientFullName : formData.accountType === "doctor" ? formData.doctorFullName : formData.hospitalName;
-    const email = formData.accountType === "patient" ? formData.patientEmail : formData.accountType === "doctor" ? formData.doctorEmail : formData.hospitalEmail;
-    login({ id: Date.now().toString(), name, email, role: formData.accountType });
+    
+    login({ id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role });
   };
 
   const slideVariants = {

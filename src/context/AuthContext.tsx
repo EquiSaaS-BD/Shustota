@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Route based on role
     if (userData.role === 'patient') {
-      router.push('/chat');
+      router.push('/patient/dashboard');
     } else if (userData.role === 'doctor') {
       router.push('/doctor/dashboard'); // Doctor dashboard
     } else if (userData.role === 'hospital') {
