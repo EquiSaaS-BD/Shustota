@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Clock, MonitorPlay, UserCheck, Activity, Smartphone, Plus, X, ToggleLeft, ToggleRight, QrCode, Mail, Link as LinkIcon, CheckCircle2, Undo2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { toast, Toaster } from 'sonner';
 
 const stats = [
@@ -217,7 +218,9 @@ export default function DoctorDashboardPage() {
             <div className="bg-[#F7FAFC] p-6 rounded-[16px] border border-slate-100 relative overflow-hidden group flex flex-col justify-between h-full">
               <div>
                 <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="text-[12px] bg-white border border-slate-200 shadow-sm px-3 py-1 rounded-full text-slate-600 font-medium hover:text-[#2F80ED] hover:border-[#2F80ED]">View Details</button>
+                  <Link href={`/doctor/dashboard/prescription/new?patientName=${encodeURIComponent(queue[0]?.name || "")}&patientId=${queue[0]?.token || ""}&appointmentTime=10:00+AM`}>
+                    <button className="text-[12px] bg-[#6DDA6E] text-white shadow-sm px-4 py-1.5 rounded-full font-bold hover:bg-[#5bc95c] transition-colors">Start Consultation</button>
+                  </Link>
                 </div>
                 <span className="text-[14px] text-slate-500 font-semibold uppercase tracking-wider flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#2F80ED] animate-pulse"></span>

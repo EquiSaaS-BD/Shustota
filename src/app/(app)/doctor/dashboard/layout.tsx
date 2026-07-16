@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { DoctorSidebar } from "@/components/doctor/DoctorSidebar";
 import { DoctorHeader } from "@/components/doctor/DoctorHeader";
@@ -15,6 +16,9 @@ export default function DoctorDashboardLayout({
 }) {
   const { user, role, isAuthenticated, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  
+  const isPrescriptionEditor = pathname === "/doctor/dashboard/prescription/new";
 
   // Loading state
   if (isLoading) {
@@ -44,7 +48,9 @@ export default function DoctorDashboardLayout({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Header */}
-        <DoctorHeader onMenuClick={() => setSidebarOpen(true)} />
+        {!isPrescriptionEditor && (
+          <DoctorHeader onMenuClick={() => setSidebarOpen(true)} />
+        )}
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
