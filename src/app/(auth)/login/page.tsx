@@ -18,26 +18,37 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Demo logic: assign role based on email keyword
-    let role = "patient";
-    if (email.includes("doctor")) role = "doctor";
-    if (email.includes("hospital")) role = "hospital";
-    if (email.includes("assistant")) role = "assistant";
-
-    login({
-      id: "123",
-      name: "Demo User",
-      email: email,
-      role: role as "patient" | "doctor" | "hospital" | "admin" | "assistant"
-    });
     
-    toast.success("Login successful!", {
-      style: {
-        background: '#22C55E',
-        color: '#fff',
-        border: 'none',
-      }
-    });
+    // Check localStorage DB
+    const existingUsersStr = localStorage.getItem('shustota_users');
+    const existingUsers = existingUsersStr ? JSON.parse(existingUsersStr) : [];
+    
+    const user = existingUsers.find((u: any) => u.email === email && u.password === password);
+    
+    if (user) {
+      login({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      });
+      
+      toast.success("Login successful!", {
+        style: {
+          background: '#22C55E',
+          color: '#fff',
+          border: 'none',
+        }
+      });
+    } else {
+      toast.error("Invalid email or password.", {
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          border: 'none',
+        }
+      });
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -114,7 +125,7 @@ export default function LoginPage() {
                 </div>
                 <span className="text-slate-600 font-medium">Remember me</span>
               </label>
-              <a href="#" className="text-[#70DE71] font-bold hover:underline">Forgot Password?</a>
+              <Link href="/reset-password" className="text-[#70DE71] font-bold hover:underline">Forgot Password?</Link>
             </div>
 
             <button type="submit" className="w-full h-[52px] bg-[#70DE71] hover:bg-[#5bc95c] text-white rounded-xl font-bold transition-all shadow-md active:scale-[0.98]">
