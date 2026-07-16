@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Clock, MonitorPlay, UserCheck, Activity, Smartphone, Plus, X, ToggleLeft, ToggleRight, QrCode, Mail, Link as LinkIcon } from 'lucide-react';
+import { Users, Clock, MonitorPlay, UserCheck, Activity, Smartphone, Plus, X, ToggleLeft, ToggleRight, QrCode, Mail, Link as LinkIcon, CheckCircle2, Undo2 } from 'lucide-react';
 import Image from 'next/image';
+import { toast, Toaster } from 'sonner';
 
 const stats = [
   { title: "Today's Appointments", count: "42", icon: Users, color: "text-[#2F80ED]", bg: "bg-[#2F80ED]/10" },
@@ -26,6 +27,26 @@ const activityLog = [
 
 export default function DoctorDashboardPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteId, setInviteId] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("Front Desk / Receptionist");
+  const [isInviting, setIsInviting] = useState(false);
+  
+  // Dynamic Queue State
+  const [queue, setQueue] = useState([
+    { token: "S-01", name: "Rahim Uddin", info: "First Visit • Fever, Cough" },
+    { token: "S-02", name: "Fatema Begum", info: "Follow Up • Headache" },
+    { token: "S-03", name: "Karim Ali", info: "Report Showing" },
+    { token: "S-04", name: "Nasima Akter", info: "First Visit" }
+  ]);
+  const [previousQueue, setPreviousQueue] = useState<{ token: string, name: string, info: string }[]>([]);
+  
+  // Real or mock data for connected assistants
+  const [connectedAssistants, setConnectedAssistants] = useState([
+    { id: "100010001000", name: "Kamrul Hasan", status: "Online (Front Desk)", color: "text-[#22C55E]", bg: "bg-[#22C55E]", isPending: false },
+    { id: "200020002000", name: "Aisha Begum", status: "Offline (Shift ended)", color: "text-slate-400", bg: "bg-slate-200", isPending: false }
+  ]);
+
   const [permissions, setPermissions] = useState({
     apt: true, queue: true, walkin: true, pay: true, notif: true, cal: true, 
     sched: true, checkin: true, report: true, analytics: true,
@@ -34,6 +55,104 @@ export default function DoctorDashboardPage() {
 
   const togglePermission = (key: keyof typeof permissions) => {
     setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleSendInvite = async () => {
+    if (inviteId.length !== 12 || !/^\d+$/.test(inviteId)) {
+      toast.error("Assistant ID must be exactly 12 digits.");
+      return;
+    }
+    if (!inviteEmail) {
+      toast.error("Please enter email address.");
+      return;
+    }
+
+    setIsInviting(true);
+    await new Promise(r => setTimeout(r, 1000));
+    setIsInviting(false);
+
+    // Add to pending
+    const newAst = {
+      id: inviteId,
+      name: "Pending Assistant",
+      status: "Pending Invite",
+      color: "text-[#F59E0B]",
+      bg: "bg-[#F59E0B]",
+      isPending: true
+    };
+    
+    setConnectedAssistants([newAst, ...connectedAssistants]);
+    
+    // Save to local storage for the assistant to see
+    const invitesStr = localStorage.getItem('shustota_invites');
+    const invites = invitesStr ? JSON.parse(invitesStr) : [];
+    invites.push({ id: Date.now().toString(), assistantId: inviteId, email: inviteEmail, role: inviteRole, status: 'pending' });
+    localStorage.setItem('shustota_invites', JSON.stringify(invites));
+
+    setShowInviteModal(false);
+    setInviteId("");
+    setInviteEmail("");
+    toast.success("Invite sent successfully!");
+  };
+
+  const handleRemoveAssistant = (id: string) => {
+    setConnectedAssistants(prev => prev.filter(a => a.id !== id));
+    toast.success("Assistant removed.");
+    
+    // Create a notification for the assistant
+    const notifsStr = localStorage.getItem('shustota_notifications');
+    const notifs = notifsStr ? JSON.parse(notifsStr) : [];
+    notifs.push({ id: Date.now().toString(), targetId: id, message: "You have been removed by Dr. Sarah.", read: false });
+    localStorage.setItem('shustota_notifications', JSON.stringify(notifs));
+  };
+
+  const handleNextPatient = async () => {
+    if (queue.length === 0) {
+      toast.error("No more patients in the queue.");
+      return;
+    }
+    
+    const completedPatient = queue[0];
+    const completedToken = completedPatient.token;
+    const nextToken = queue[1]?.token || "None";
+    
+    setPreviousQueue([completedPatient, ...previousQueue]);
+    setQueue(prev => prev.slice(1));
+    toast.success("Next patient called successfully!", { style: { background: '#22C55E', color: 'white' }});
+    
+    // Send notification to assistant
+    const notifsStr = localStorage.getItem('shustota_notifications');
+    const notifs = notifsStr ? JSON.parse(notifsStr) : [];
+    notifs.push({ 
+      id: Date.now().toString(), 
+      targetId: 'assistant', 
+      message: `Doctor completed ${completedToken} and called ${nextToken}. Please send them in.`, 
+      read: false 
+    });
+    localStorage.setItem('shustota_notifications', JSON.stringify(notifs));
+  };
+
+  const handleUndoPatient = () => {
+    if (previousQueue.length === 0) {
+      toast.error("No previous patient to return to.");
+      return;
+    }
+
+    const lastPatient = previousQueue[0];
+    setPreviousQueue(prev => prev.slice(1));
+    setQueue([lastPatient, ...queue]);
+    
+    toast.success("Reverted to previous patient.");
+    
+    const notifsStr = localStorage.getItem('shustota_notifications');
+    const notifs = notifsStr ? JSON.parse(notifsStr) : [];
+    notifs.push({ 
+      id: Date.now().toString(), 
+      targetId: 'assistant', 
+      message: `Doctor reverted the queue to ${lastPatient.token}.`, 
+      read: false 
+    });
+    localStorage.setItem('shustota_notifications', JSON.stringify(notifs));
   };
 
   return (
@@ -50,23 +169,23 @@ export default function DoctorDashboardPage() {
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5">
         {stats.map((stat, idx) => (
           <motion.div 
             key={idx}
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
-            className="h-[140px] bg-white rounded-[20px] p-5 shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow"
+            className="bg-white rounded-[20px] p-4 sm:p-5 shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow h-full min-h-[140px]"
           >
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start mb-4">
               <div className={`w-[40px] h-[40px] rounded-[12px] flex items-center justify-center ${stat.bg}`}>
                 <stat.icon size={20} className={stat.color} />
               </div>
             </div>
             <div>
-              <h3 className="text-[34px] font-bold text-slate-800 leading-none mb-1">{stat.count}</h3>
-              <p className="text-[14px] font-medium text-slate-500">{stat.title}</p>
+              <h3 className="text-[28px] sm:text-[32px] font-extrabold text-slate-800 leading-none mb-1.5">{stat.count}</h3>
+              <p className="text-[12px] sm:text-[13px] font-semibold text-slate-500 leading-snug">{stat.title}</p>
             </div>
           </motion.div>
         ))}
@@ -94,31 +213,70 @@ export default function DoctorDashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-[#F7FAFC] p-6 rounded-[16px] border border-slate-100 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="text-[12px] bg-white border border-slate-200 shadow-sm px-3 py-1 rounded-full text-slate-600 font-medium hover:text-[#2F80ED] hover:border-[#2F80ED]">View Details</button>
-              </div>
-              <span className="text-[14px] text-slate-500 font-semibold uppercase tracking-wider">Current Patient</span>
-              <div className="mt-4 flex items-center justify-between">
-                <div>
-                  <span className="text-[54px] font-extrabold text-[#2F80ED] leading-none block mb-2">S-01</span>
-                  <span className="text-[18px] font-bold text-slate-800">Rahim Uddin</span>
-                  <p className="text-[14px] text-slate-500">First Visit • Fever, Cough</p>
+            {/* Current Patient */}
+            <div className="bg-[#F7FAFC] p-6 rounded-[16px] border border-slate-100 relative overflow-hidden group flex flex-col justify-between h-full">
+              <div>
+                <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button className="text-[12px] bg-white border border-slate-200 shadow-sm px-3 py-1 rounded-full text-slate-600 font-medium hover:text-[#2F80ED] hover:border-[#2F80ED]">View Details</button>
                 </div>
-                <div className="w-[70px] h-[70px] rounded-full bg-[#2F80ED]/10 hidden sm:flex items-center justify-center text-[24px] font-bold text-[#2F80ED]">R</div>
+                <span className="text-[14px] text-slate-500 font-semibold uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#2F80ED] animate-pulse"></span>
+                  Current Patient
+                </span>
+                <div className="mt-4 flex items-center justify-between">
+                  <div>
+                    <span className="text-[54px] font-extrabold text-[#2F80ED] leading-none block mb-2">{queue[0]?.token || "-"}</span>
+                    <span className="text-[18px] font-bold text-slate-800">{queue[0]?.name || "No Patient"}</span>
+                    <p className="text-[14px] text-slate-500">{queue[0]?.info || ""}</p>
+                  </div>
+                  <div className="w-[70px] h-[70px] rounded-full bg-[#2F80ED]/10 hidden sm:flex items-center justify-center text-[24px] font-bold text-[#2F80ED]">
+                    {queue[0]?.name?.charAt(0) || "-"}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 pt-5 border-t border-slate-200 flex gap-3">
+                <button 
+                  onClick={handleUndoPatient}
+                  disabled={previousQueue.length === 0}
+                  title="Undo Call Next"
+                  className="w-[60px] h-[52px] shrink-0 bg-[#F59E0B]/10 hover:bg-[#F59E0B] text-[#D97706] hover:text-white border border-[#F59E0B]/30 font-bold rounded-xl flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Undo2 size={20} />
+                </button>
+                <button 
+                  onClick={handleNextPatient}
+                  disabled={queue.length === 0}
+                  className="flex-1 bg-[#2F80ED] hover:bg-[#2563EB] text-white font-bold h-[52px] rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CheckCircle2 size={20} /> Complete & Call Next
+                </button>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-[16px] border border-slate-200">
+            {/* Next Patient */}
+            <div className="bg-white p-6 rounded-[16px] border border-slate-200 flex flex-col">
               <span className="text-[14px] text-slate-500 font-semibold uppercase tracking-wider">Next Patient</span>
-              <div className="mt-4 flex items-center justify-between">
+              <div className="mt-4 flex items-center justify-between opacity-80">
                 <div>
-                  <span className="text-[40px] font-bold text-slate-400 leading-none block mb-2">S-02</span>
-                  <span className="text-[16px] font-bold text-slate-700">Fatema Begum</span>
-                  <p className="text-[14px] text-slate-500">Follow Up • Headache</p>
+                  <span className="text-[40px] font-bold text-slate-400 leading-none block mb-2">{queue[1]?.token || "-"}</span>
+                  <span className="text-[16px] font-bold text-slate-700">{queue[1]?.name || "End of Queue"}</span>
+                  <p className="text-[14px] text-slate-500">{queue[1]?.info || ""}</p>
                 </div>
-                <div className="w-[60px] h-[60px] rounded-full bg-slate-100 hidden sm:flex items-center justify-center text-[20px] font-bold text-slate-500">F</div>
+                {queue[1] && (
+                  <div className="w-[60px] h-[60px] rounded-full bg-slate-100 hidden sm:flex items-center justify-center text-[20px] font-bold text-slate-500">
+                    {queue[1].name.charAt(0)}
+                  </div>
+                )}
               </div>
+              
+              {queue.length > 2 && (
+                <div className="mt-auto pt-5">
+                  <p className="text-[13px] text-slate-500 font-medium bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <span className="font-bold text-slate-700">Upcoming:</span> {queue[2].token} - {queue[2].name}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
@@ -138,26 +296,25 @@ export default function DoctorDashboardPage() {
             </div>
             
             <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between bg-slate-50 p-4 rounded-[12px] border border-slate-100 group transition-colors hover:border-slate-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-[40px] h-[40px] rounded-full bg-[#6DDA6E]/20 text-[#6DDA6E] font-bold flex items-center justify-center text-sm shrink-0">K</div>
-                  <div>
-                    <h4 className="text-[15px] font-bold text-slate-800 leading-tight">Kamrul Hasan</h4>
-                    <span className="text-[13px] text-[#22C55E] font-medium flex items-center gap-1.5 mt-0.5"><span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse"></span> Online (Front Desk)</span>
+              {connectedAssistants.map((ast) => (
+                <div key={ast.id} className="flex items-center justify-between bg-slate-50 p-4 rounded-[12px] border border-slate-100 group transition-colors hover:border-slate-200">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-[40px] h-[40px] rounded-full ${ast.bg}/20 ${ast.color} font-bold flex items-center justify-center text-sm shrink-0`}>
+                      {ast.name.charAt(0)}
+                    </div>
+                    <div>
+                      <h4 className="text-[15px] font-bold text-slate-800 leading-tight">{ast.name}</h4>
+                      <span className={`text-[13px] ${ast.color} font-medium flex items-center gap-1.5 mt-0.5`}>
+                        {!ast.isPending && ast.status.includes('Online') && <span className={`w-1.5 h-1.5 rounded-full ${ast.bg} animate-pulse`}></span>}
+                        {ast.status}
+                      </span>
+                    </div>
                   </div>
+                  <button onClick={() => handleRemoveAssistant(ast.id)} className="text-[12px] font-bold text-[#EF4444] opacity-0 group-hover:opacity-100 transition-opacity bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100">
+                    {ast.isPending ? 'Cancel' : 'Remove'}
+                  </button>
                 </div>
-                <button className="text-[12px] font-bold text-[#EF4444] opacity-0 group-hover:opacity-100 transition-opacity bg-red-50 px-3 py-1.5 rounded-lg">Remove</button>
-              </div>
-              <div className="flex items-center justify-between bg-white p-4 rounded-[12px] border border-slate-100 group transition-colors hover:border-slate-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-[40px] h-[40px] rounded-full bg-slate-200 text-slate-500 font-bold flex items-center justify-center text-sm shrink-0">A</div>
-                  <div>
-                    <h4 className="text-[15px] font-bold text-slate-700 leading-tight">Aisha Begum</h4>
-                    <span className="text-[13px] text-slate-400 font-medium mt-0.5 block">Offline (Shift ended)</span>
-                  </div>
-                </div>
-                <button className="text-[12px] font-bold text-[#EF4444] opacity-0 group-hover:opacity-100 transition-opacity bg-red-50 px-3 py-1.5 rounded-lg">Remove</button>
-              </div>
+              ))}
             </div>
           </motion.div>
         </div>
@@ -215,20 +372,33 @@ export default function DoctorDashboardPage() {
               <div className="p-6 md:p-8 overflow-y-auto custom-scrollbar">
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="col-span-2 md:col-span-1">
-                    <label className="text-[13px] font-semibold text-slate-700 block mb-1.5">Assistant Name *</label>
-                    <input type="text" className="w-full h-[50px] border border-slate-200 rounded-[12px] px-4 text-[14px] focus:outline-none focus:border-[#2F80ED]" />
+                    <label className="text-[13px] font-semibold text-slate-700 block mb-1.5">Assistant id *</label>
+                    <input 
+                      type="text" 
+                      value={inviteId}
+                      onChange={(e) => setInviteId(e.target.value.replace(/\D/g, ''))}
+                      maxLength={12} 
+                      placeholder="12-digit number"
+                      className="w-full h-[50px] border border-slate-200 rounded-[12px] px-4 text-[14px] focus:outline-none focus:border-[#2F80ED]" 
+                    />
                   </div>
                   <div className="col-span-2 md:col-span-1">
                     <label className="text-[13px] font-semibold text-slate-700 block mb-1.5">Email Address *</label>
-                    <input type="email" className="w-full h-[50px] border border-slate-200 rounded-[12px] px-4 text-[14px] focus:outline-none focus:border-[#2F80ED]" />
+                    <input 
+                      type="email" 
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      placeholder="assistant@email.com"
+                      className="w-full h-[50px] border border-slate-200 rounded-[12px] px-4 text-[14px] focus:outline-none focus:border-[#2F80ED]" 
+                    />
                   </div>
-                  <div className="col-span-2 md:col-span-1">
-                    <label className="text-[13px] font-semibold text-slate-700 block mb-1.5">Phone Number *</label>
-                    <input type="tel" className="w-full h-[50px] border border-slate-200 rounded-[12px] px-4 text-[14px] focus:outline-none focus:border-[#2F80ED]" />
-                  </div>
-                  <div className="col-span-2 md:col-span-1">
+                  <div className="col-span-2 md:col-span-2">
                     <label className="text-[13px] font-semibold text-slate-700 block mb-1.5">Role *</label>
-                    <select className="w-full h-[50px] border border-slate-200 rounded-[12px] px-4 text-[14px] focus:outline-none focus:border-[#2F80ED] bg-white appearance-none">
+                    <select 
+                      value={inviteRole}
+                      onChange={(e) => setInviteRole(e.target.value)}
+                      className="w-full h-[50px] border border-slate-200 rounded-[12px] px-4 text-[14px] focus:outline-none focus:border-[#2F80ED] bg-white appearance-none"
+                    >
                       <option>Front Desk / Receptionist</option>
                       <option>Clinic Manager</option>
                     </select>
@@ -251,10 +421,16 @@ export default function DoctorDashboardPage() {
                 </div>
               </div>
 
-              <div className="px-6 md:px-8 py-5 border-t border-slate-100 bg-white shrink-0 flex justify-end gap-3 sticky bottom-0">
-                <button onClick={() => setShowInviteModal(false)} className="px-6 py-2.5 rounded-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition-colors">Cancel</button>
-                <button onClick={() => setShowInviteModal(false)} className="px-8 py-2.5 bg-[#2F80ED] hover:bg-[#2563EB] text-white rounded-[12px] font-bold shadow-[0_4px_12px_rgba(47,128,237,0.3)] transition-all flex items-center gap-2">
-                  <Mail size={18} /> Send Invite
+              <div className="px-6 md:px-8 py-5 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-3 sticky bottom-0 z-10 shrink-0">
+                <button onClick={() => setShowInviteModal(false)} className="px-6 py-2.5 text-slate-600 font-semibold rounded-[12px] hover:bg-slate-200 transition-colors">
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleSendInvite}
+                  disabled={isInviting}
+                  className="px-6 py-2.5 bg-[#2F80ED] hover:bg-[#2563EB] text-white font-bold rounded-[12px] transition-colors shadow-md flex items-center gap-2"
+                >
+                  {isInviting ? <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span> : 'Send Invite'}
                 </button>
               </div>
             </motion.div>

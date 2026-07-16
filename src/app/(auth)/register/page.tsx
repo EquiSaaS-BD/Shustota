@@ -183,7 +183,7 @@ export default function RegisterPage() {
     const existingUsersStr = localStorage.getItem('shustota_users');
     const existingUsers = existingUsersStr ? JSON.parse(existingUsersStr) : [];
     
-    if (existingUsers.some((u: any) => u.email === email)) {
+    if (existingUsers.some((u: any) => u.email.toLowerCase().trim() === email.toLowerCase().trim())) {
       setIsLoading(false);
       toast.error("This email is already registered. Please login.", {
         style: { background: '#EF4444', color: '#fff', border: 'none' }
@@ -193,9 +193,16 @@ export default function RegisterPage() {
 
     await new Promise((r) => setTimeout(r, 1500)); // simulate network
 
+    // Generate 12-digit ID for assistants
+    let generatedAstId = undefined;
+    if (formData.accountType === "assistant") {
+      generatedAstId = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+    }
+
     // Save new user
     const newUser = {
       id: Date.now().toString(),
+      assistantId: generatedAstId,
       name,
       email,
       role: formData.accountType,
@@ -205,8 +212,13 @@ export default function RegisterPage() {
     existingUsers.push(newUser);
     localStorage.setItem('shustota_users', JSON.stringify(existingUsers));
 
-    toast.success("Account created successfully!");
-    await new Promise((r) => setTimeout(r, 800));
+    if (generatedAstId) {
+      toast.success(`Account created! Your Assistant ID is: ${generatedAstId}`, { duration: 6000 });
+    } else {
+      toast.success("Account created successfully!");
+    }
+    
+    await new Promise((r) => setTimeout(r, 1500));
     
     login({ id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role });
   };
@@ -343,11 +355,10 @@ export default function RegisterPage() {
                   <>
                     <InputField error={errors["assistantFullName"]} id="assistantFullName" label="Full Name" required isHalf value={formData.assistantFullName} onChange={(e: any) => updateForm("assistantFullName", e.target.value)} />
                     <InputField error={errors["assistantEmail"]} id="assistantEmail" label="Email Address" type="email" required isHalf value={formData.assistantEmail} onChange={(e: any) => updateForm("assistantEmail", e.target.value)} />
-                    <InputField error={errors["assistantMobile"]} id="assistantMobile" label="Mobile Number" type="tel" required isHalf value={formData.assistantMobile} onChange={(e: any) => updateForm("assistantMobile", e.target.value)} />
-                    <InputField error={errors["assistantInviteCode"]} id="assistantInviteCode" label="Invite Code (Optional)" isHalf value={formData.assistantInviteCode} onChange={(e: any) => updateForm("assistantInviteCode", e.target.value)} />
+                    <InputField error={errors["assistantMobile"]} id="assistantMobile" label="Mobile Number" type="tel" required value={formData.assistantMobile} onChange={(e: any) => updateForm("assistantMobile", e.target.value)} />
                     <div className="col-span-2 mt-2 bg-slate-50 p-4 rounded-[16px] border border-slate-100 shadow-sm">
                       <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                        <span className="font-bold text-slate-700">Note:</span> If a doctor invited you, entering the invite code will automatically connect you to their chamber.
+                        <span className="font-bold text-slate-700">Note:</span> After creating your account, you will receive a 12-digit Unique Assistant ID. Doctors will use this ID to invite you to their clinic.
                       </p>
                     </div>
                   </>

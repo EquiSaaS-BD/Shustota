@@ -1,124 +1,211 @@
 "use client";
 
+import { useState } from "react";
 import { 
-  Bell, 
-  MessageSquare, 
-  CalendarCheck, 
-  Megaphone,
-  Globe,
-  Clock,
-  Moon
+  Bell, Smartphone, Mail, Volume2, Globe2, Save
 } from "lucide-react";
-
-const NotificationToggle = ({ title, desc, icon: Icon, defaultChecked = true }: any) => (
-  <div className="flex items-center justify-between p-5 hover:bg-slate-50 transition-colors">
-    <div className="flex items-center gap-4 flex-1 overflow-hidden pr-4">
-      <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 shrink-0">
-        <Icon size={18} />
-      </div>
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <h3 className="text-[15px] font-semibold text-slate-800 truncate">{title}</h3>
-        <p className="text-[13px] text-slate-500 truncate mt-0.5">{desc}</p>
-      </div>
-    </div>
-    <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-2">
-      <input type="checkbox" className="sr-only toggle-checkbox peer" defaultChecked={defaultChecked} />
-      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer toggle-label transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
-    </label>
-  </div>
-);
+import { toast, Toaster } from "sonner";
 
 export default function NotificationsSettingsPage() {
+  const [isSaving, setIsSaving] = useState(false);
+  const [preferences, setPreferences] = useState({
+    pushAppointments: true,
+    pushMessages: true,
+    pushUpdates: false,
+    smsAppointments: true,
+    smsReminders: true,
+    emailDaily: true,
+    emailWeekly: false,
+    emailMarketing: false,
+    soundEnabled: true,
+    language: "en"
+  });
+
+  const handleToggle = (key: keyof typeof preferences) => {
+    setPreferences({ ...preferences, [key]: !preferences[key] });
+  };
+
+  const handleSave = () => {
+    setIsSaving(true);
+    setTimeout(() => {
+      setIsSaving(false);
+      toast.success("Preferences updated successfully!");
+    }, 1000);
+  };
+
+  const ToggleSwitch = ({ checked, onChange }: { checked: boolean, onChange: () => void }) => (
+    <button 
+      onClick={onChange}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${checked ? 'bg-[#2F80ED]' : 'bg-slate-300'}`}
+    >
+      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
+    </button>
+  );
+
   return (
-    <div className="space-y-8 animate-fade-in-up">
+    <div className="space-y-8 animate-fade-in-up pb-20">
+      <Toaster position="top-center" />
       
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Notifications & Preferences</h1>
-        <p className="text-slate-500 mt-1">Customize how we communicate with you and personalize your experience.</p>
+      <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 p-6 lg:p-8">
+        <div className="flex justify-between items-start md:items-center">
+          <div>
+            <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
+              Notifications & Preferences
+            </h1>
+            <p className="text-slate-500 mt-1">Manage how you receive alerts and customize your dashboard experience.</p>
+          </div>
+          <button 
+            onClick={handleSave}
+            disabled={isSaving}
+            className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl shadow-lg transition-all flex items-center gap-2"
+          >
+            {isSaving ? (
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            ) : (
+              <Save size={16} />
+            )}
+            Save Changes
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         
-        {/* Notifications */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="p-6 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <Bell size={20} className="text-primary" /> Push Notifications
-            </h2>
-          </div>
-          <div className="divide-y divide-slate-100">
-            <NotificationToggle 
-              title="Appointment Reminders" 
-              desc="Receive alerts 30 minutes before an upcoming online consultation." 
-              icon={CalendarCheck} 
-            />
-            <NotificationToggle 
-              title="Patient Messages" 
-              desc="Get notified when a patient sends a direct message or report." 
-              icon={MessageSquare} 
-            />
-            <NotificationToggle 
-              title="System Updates" 
-              desc="Alerts regarding platform maintenance and new features." 
-              icon={Globe} 
-            />
-            <NotificationToggle 
-              title="Marketing & Promos" 
-              desc="Receive promotional emails and offers from Shustota AI." 
-              icon={Megaphone} 
-              defaultChecked={false}
-            />
-          </div>
-        </div>
-
-        {/* Preferences */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-800 mb-6">Regional & Display</h2>
+        {/* Left Column: Notification Channels */}
+        <div className="space-y-8">
           
-          <div className="space-y-6">
-            <div>
-              <label className="settings-label flex items-center gap-2">
-                <Globe size={16} className="text-slate-400" /> Language
-              </label>
-              <select className="settings-input appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM5NGExYjIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:1.25em_1.25em]">
-                <option value="en">English (US)</option>
-                <option value="bn">Bengali (বাংলা)</option>
-              </select>
+          {/* Push Notifications */}
+          <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 overflow-hidden w-full">
+            <div className="p-6 border-b border-slate-100 bg-slate-50">
+              <h3 className="text-[16px] font-bold text-slate-800 flex items-center gap-2">
+                <Bell size={20} className="text-[#2F80ED]" /> Push Notifications (Browser/App)
+              </h3>
             </div>
-            
-            <div>
-              <label className="settings-label flex items-center gap-2">
-                <Clock size={16} className="text-slate-400" /> Timezone
-              </label>
-              <select className="settings-input appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM5NGExYjIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:1.25em_1.25em]">
-                <option value="Asia/Dhaka">Asia/Dhaka (GMT+6)</option>
-                <option value="Asia/Kolkata">Asia/Kolkata (GMT+5:30)</option>
-                <option value="UTC">UTC</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="settings-label flex items-center gap-2">
-                <Moon size={16} className="text-slate-400" /> Theme Preference
-              </label>
-              <div className="grid grid-cols-3 gap-3">
-                <button className="py-2.5 text-sm font-semibold rounded-xl border-2 border-primary bg-primary/5 text-primary transition-all">
-                  System
-                </button>
-                <button className="py-2.5 text-sm font-semibold rounded-xl border border-slate-200 bg-white text-slate-600 hover:border-slate-300 transition-all">
-                  Light
-                </button>
-                <button className="py-2.5 text-sm font-semibold rounded-xl border border-slate-200 bg-slate-900 text-slate-400 hover:text-white transition-all">
-                  Dark
-                </button>
+            <div className="p-2">
+              <div className="p-4 flex items-center justify-between border-b border-slate-100">
+                <div>
+                  <h4 className="text-[14px] font-bold text-slate-800">New Appointments</h4>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Alert when a patient books a new slot.</p>
+                </div>
+                <ToggleSwitch checked={preferences.pushAppointments} onChange={() => handleToggle('pushAppointments')} />
+              </div>
+              <div className="p-4 flex items-center justify-between border-b border-slate-100">
+                <div>
+                  <h4 className="text-[14px] font-bold text-slate-800">Assistant Messages</h4>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Alert for internal team chat and updates.</p>
+                </div>
+                <ToggleSwitch checked={preferences.pushMessages} onChange={() => handleToggle('pushMessages')} />
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <div>
+                  <h4 className="text-[14px] font-bold text-slate-800">Platform Updates</h4>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Receive news about new Shusthota features.</p>
+                </div>
+                <ToggleSwitch checked={preferences.pushUpdates} onChange={() => handleToggle('pushUpdates')} />
               </div>
             </div>
           </div>
 
-          <button className="mt-8 px-6 py-2.5 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl shadow-md transition-all w-full">
-            Save Preferences
-          </button>
+          {/* SMS Alerts */}
+          <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 overflow-hidden w-full">
+            <div className="p-6 border-b border-slate-100 bg-[#8B5CF6]/5">
+              <h3 className="text-[16px] font-bold text-slate-800 flex items-center gap-2">
+                <Smartphone size={20} className="text-[#8B5CF6]" /> SMS Alerts
+              </h3>
+            </div>
+            <div className="p-2">
+              <div className="p-4 flex items-center justify-between border-b border-slate-100">
+                <div>
+                  <h4 className="text-[14px] font-bold text-slate-800">Appointment Confirmation</h4>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Receive SMS when an appointment is confirmed.</p>
+                </div>
+                <ToggleSwitch checked={preferences.smsAppointments} onChange={() => handleToggle('smsAppointments')} />
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <div>
+                  <h4 className="text-[14px] font-bold text-slate-800">Daily Schedule Reminder</h4>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Morning SMS with your daily patient queue.</p>
+                </div>
+                <ToggleSwitch checked={preferences.smsReminders} onChange={() => handleToggle('smsReminders')} />
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Right Column: Email & Preferences */}
+        <div className="space-y-8">
+          
+          {/* Email Notifications */}
+          <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 overflow-hidden w-full">
+            <div className="p-6 border-b border-slate-100 bg-[#F59E0B]/5">
+              <h3 className="text-[16px] font-bold text-slate-800 flex items-center gap-2">
+                <Mail size={20} className="text-[#F59E0B]" /> Email Summaries
+              </h3>
+            </div>
+            <div className="p-2">
+              <div className="p-4 flex items-center justify-between border-b border-slate-100">
+                <div>
+                  <h4 className="text-[14px] font-bold text-slate-800">Daily Summary</h4>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Get a daily email of completed appointments.</p>
+                </div>
+                <ToggleSwitch checked={preferences.emailDaily} onChange={() => handleToggle('emailDaily')} />
+              </div>
+              <div className="p-4 flex items-center justify-between border-b border-slate-100">
+                <div>
+                  <h4 className="text-[14px] font-bold text-slate-800">Weekly Analytics</h4>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Receive a weekly report of patient flow.</p>
+                </div>
+                <ToggleSwitch checked={preferences.emailWeekly} onChange={() => handleToggle('emailWeekly')} />
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <div>
+                  <h4 className="text-[14px] font-bold text-slate-800">Marketing & Offers</h4>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Occasional emails about subscription plans.</p>
+                </div>
+                <ToggleSwitch checked={preferences.emailMarketing} onChange={() => handleToggle('emailMarketing')} />
+              </div>
+            </div>
+          </div>
+
+          {/* System Preferences */}
+          <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 overflow-hidden w-full">
+            <div className="p-6 border-b border-slate-100 bg-[#10B981]/5">
+              <h3 className="text-[16px] font-bold text-slate-800 flex items-center gap-2">
+                <Volume2 size={20} className="text-[#10B981]" /> System Preferences
+              </h3>
+            </div>
+            <div className="p-6 space-y-6">
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-[14px] font-bold text-slate-800">Dashboard Sound</h4>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Play a sound on new notifications.</p>
+                </div>
+                <ToggleSwitch checked={preferences.soundEnabled} onChange={() => handleToggle('soundEnabled')} />
+              </div>
+
+              <div className="h-[1px] w-full bg-slate-100"></div>
+
+              <div>
+                <label className="block text-[14px] font-bold text-slate-800 mb-1.5 flex items-center gap-2">
+                  <Globe2 size={16} className="text-slate-500" /> Interface Language
+                </label>
+                <p className="text-[13px] text-slate-500 mb-3">Select the default language for your dashboard.</p>
+                <select 
+                  value={preferences.language}
+                  onChange={(e) => setPreferences({...preferences, language: e.target.value})}
+                  className="w-full h-[48px] bg-slate-50 border border-slate-200 rounded-xl px-4 text-[14px] text-slate-800 font-semibold focus:outline-none focus:border-[#2F80ED] transition-all cursor-pointer"
+                >
+                  <option value="en">English (Default)</option>
+                  <option value="bn">Bengali (বাংলা)</option>
+                </select>
+              </div>
+
+            </div>
+          </div>
+
         </div>
 
       </div>

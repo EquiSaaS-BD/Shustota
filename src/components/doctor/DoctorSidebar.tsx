@@ -69,15 +69,15 @@ export function DoctorSidebar({ isOpen, onClose }: DoctorSidebarProps) {
         <div className="h-16 px-6 flex items-center justify-between border-b border-slate-100 shrink-0">
           <Link href="/doctor/dashboard" className="flex items-center gap-2.5">
             <Image
-              src="/images/shustota ai logo.png"
+              src="/images/shustota icon.png"
               alt="Shustota AI"
               width={36}
               height={36}
               className="rounded-lg"
             />
-            <div>
-              <span className="text-lg font-bold text-slate-800 tracking-tight">Shustota</span>
-              <span className="text-[10px] font-medium text-primary bg-primary/8 px-1.5 py-0.5 rounded-full ml-1.5 uppercase tracking-wider">Doctor</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[18px] font-bold text-slate-800 tracking-tight">Shustota</span>
+              <span className="text-[9px] font-bold text-[#2F80ED] bg-[#2F80ED]/10 px-1.5 py-0.5 rounded-full uppercase tracking-wider">Doctor</span>
             </div>
           </Link>
           <button

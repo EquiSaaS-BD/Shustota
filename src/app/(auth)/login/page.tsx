@@ -23,7 +23,10 @@ export default function LoginPage() {
     const existingUsersStr = localStorage.getItem('shustota_users');
     const existingUsers = existingUsersStr ? JSON.parse(existingUsersStr) : [];
     
-    const user = existingUsers.find((u: any) => u.email === email && u.password === password);
+    const user = existingUsers.find((u: any) => 
+      u.email.toLowerCase().trim() === email.toLowerCase().trim() && 
+      u.password === password
+    );
     
     if (user) {
       login({
