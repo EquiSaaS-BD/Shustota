@@ -892,9 +892,6 @@
   }
 }
 
-  animation: shustota-line-flow 2.5s ease-in-out infinite;
-}
-
 @keyframes shustota-line-flow-vertical {
   0% { transform: translateY(-100%); }
   100% { transform: translateY(100%); }
