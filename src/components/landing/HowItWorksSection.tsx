@@ -36,7 +36,7 @@ export function HowItWorksSection() {
   ];
 
   return (
-    <section id="how-it-works" className="relative py-24 lg:py-32 bg-white overflow-hidden">
+    <section id="how-it-works" className="relative py-16 lg:py-32 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         
         <div className="text-center max-w-4xl mx-auto mb-16 lg:mb-24">

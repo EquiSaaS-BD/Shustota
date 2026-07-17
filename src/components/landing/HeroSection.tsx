@@ -71,14 +71,14 @@ export function HeroSection() {
             transition={{ duration: 0.8, delay: 0.2, ease: [0.23, 1, 0.32, 1] }}
             className="space-y-6 max-w-5xl flex flex-col items-center"
           >
-            <h1 className="relative text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] uppercase flex flex-col md:flex-row flex-wrap items-center justify-center gap-x-4 z-10">
+            <h1 className="relative text-[2.5rem] sm:text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.2] lg:leading-[1.1] uppercase flex flex-col md:flex-row flex-wrap items-center justify-center gap-x-4 z-10 break-words text-center">
               {/* Background Shadow / Glow */}
               <div className="absolute inset-0 blur-3xl opacity-30 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 animate-[gradient_4s_linear_infinite] rounded-full z-0 -m-4"></div>
               
-              <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-600 to-indigo-500 bg-[length:200%_auto] animate-[gradient_3s_linear_infinite] drop-shadow-sm">
+              <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-600 to-indigo-500 bg-[length:200%_auto] animate-[gradient_3s_linear_infinite] drop-shadow-sm text-center">
                 AI-POWERED
               </span>
-              <span className="relative z-10 text-[#0a1628] drop-shadow-md">
+              <span className="relative z-10 text-[#0a1628] drop-shadow-md text-center mt-2 md:mt-0">
                 HEALTHCARE ASSISTANT
               </span>
             </h1>
@@ -102,11 +102,11 @@ export function HeroSection() {
 
       {/* Highlights Bar Below Video */}
       <div className="w-full bg-[#050b14] py-5 border-t border-white/5 relative z-20">
-        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-6 sm:gap-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-6 lg:gap-12">
             {["AI Symptom Checker", "Prescription Scanner", "Doctor Finder", "Nutrition AI"].map((chip, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm sm:text-base font-medium text-slate-400 cursor-default">
-                <CheckCircle2 size={16} className="text-cyan-400/80" /> {chip}
+              <div key={i} className="flex items-center gap-1.5 sm:gap-2 text-[13px] sm:text-base font-medium text-slate-400 cursor-default whitespace-nowrap">
+                <CheckCircle2 size={16} className="text-cyan-400/80 shrink-0" /> {chip}
               </div>
             ))}
           </div>

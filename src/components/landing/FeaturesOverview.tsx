@@ -46,7 +46,7 @@ export function FeaturesOverview() {
   ];
 
   return (
-    <section id="features" className="relative py-24 lg:py-32 bg-slate-50 overflow-hidden">
+    <section id="features" className="relative py-16 lg:py-32 bg-slate-50 overflow-hidden">
       {/* Aurora Background Effect */}
       <div className="absolute inset-0 bg-aurora opacity-50 pointer-events-none" />
 

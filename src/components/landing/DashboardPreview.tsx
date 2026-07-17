@@ -8,7 +8,7 @@ export function DashboardPreview() {
   const { t } = useLanguage();
 
   return (
-    <section className="relative py-24 lg:py-32 bg-[#050b14] overflow-hidden">
+    <section className="relative py-16 lg:py-32 bg-[#050b14] overflow-hidden">
       
       {/* Dark Theme Grid Background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
@@ -39,18 +39,18 @@ export function DashboardPreview() {
             whileInView={{ opacity: 1, rotateX: 0, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, type: "spring", bounce: 0.2 }}
-            className="w-full max-w-4xl aspect-[16/9] glass-card !bg-[#0f172a]/60 !border-white/10 rounded-3xl p-8 shadow-[0_12px_32px_rgba(0,82,204,0.15)] relative overflow-hidden"
+            className="w-full max-w-4xl md:aspect-[16/9] glass-card !bg-[#0f172a]/60 !border-white/10 rounded-3xl p-5 sm:p-8 shadow-[0_12px_32px_rgba(0,82,204,0.15)] relative overflow-hidden"
           >
             {/* Hologram scan line inside card */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent animate-laser-scan opacity-50" />
 
-            <div className="flex justify-between items-end mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
               <div>
                 <h3 className="text-2xl font-bold text-white">{t("Health Score", "হেলথ স্কোর")}</h3>
                 <p className="text-slate-400">Based on recent AI analysis</p>
               </div>
-              <div className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-primary">
-                92<span className="text-2xl text-slate-500">/100</span>
+              <div className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-primary">
+                92<span className="text-xl sm:text-2xl text-slate-500">/100</span>
               </div>
             </div>
 

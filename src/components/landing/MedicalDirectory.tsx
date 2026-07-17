@@ -28,7 +28,7 @@ export function MedicalDirectory() {
   ];
 
   return (
-    <section id="doctors" className="relative py-24 lg:py-32 bg-white overflow-hidden">
+    <section id="doctors" className="relative py-16 lg:py-32 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         
         <div className="text-center max-w-4xl mx-auto mb-16 lg:mb-20">
@@ -153,7 +153,7 @@ export function MedicalDirectory() {
                     <motion.div 
                       key={doc.id}
                       whileHover={{ y: -5 }}
-                      className="min-w-[320px] max-w-[320px] snap-center bg-white border border-slate-100 rounded-3xl p-6 shadow-lg shadow-slate-200/40 group hover:border-primary/20 transition-all shrink-0"
+                      className="w-[85vw] max-w-[320px] sm:min-w-[320px] snap-center bg-white border border-slate-100 rounded-3xl p-6 shadow-lg shadow-slate-200/40 group hover:border-primary/20 transition-all shrink-0"
                     >
                       <div className="flex items-start justify-between mb-6">
                         <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-md">

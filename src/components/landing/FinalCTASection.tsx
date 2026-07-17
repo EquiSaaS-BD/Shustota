@@ -9,7 +9,7 @@ export function FinalCTASection() {
   const { t } = useLanguage();
 
   return (
-    <section className="relative py-24 lg:py-32 bg-[#0a1628] overflow-hidden text-center flex flex-col items-center justify-center min-h-[60vh]">
+    <section className="relative py-16 lg:py-32 bg-[#0a1628] overflow-hidden text-center flex flex-col items-center justify-center min-h-[60vh]">
       
       {/* Animated Rings Background */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">

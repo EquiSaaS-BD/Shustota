@@ -56,13 +56,18 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-700 overflow-hidden ${
         scrolled
-          ? "bg-white/60 backdrop-blur-2xl shadow-sm border-b border-white/20"
+          ? "bg-white/30 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] border-b border-white/60"
           : "bg-transparent"
       }`}
     >
-      <nav className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between">
+      {/* ── Glassmorphism Animated Shine ── */}
+      {scrolled && (
+        <div className="absolute top-0 -inset-full h-full w-1/2 z-0 block bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-30 animate-[shine_6s_infinite]" />
+      )}
+
+      <nav className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between">
         {/* ── Left Side (Logo + Nav) ── */}
         <div className="flex items-center gap-8 lg:gap-12">
           {/* ── Logo ── */}
@@ -72,7 +77,7 @@ export function Navbar() {
               alt="Shustota AI"
               width={280}
               height={95}
-              className="h-12 sm:h-14 lg:h-[4.5rem] w-auto object-contain transition-all duration-300 scale-[1.15] sm:scale-125 lg:scale-[1.35] origin-left"
+              className="h-12 sm:h-14 lg:h-[4.5rem] w-auto object-contain transition-all duration-300 scale-100 sm:scale-[1.15] lg:scale-[1.35] origin-left"
               priority
             />
           </Link>
