@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, MapPin, Star, Building2, UserCircle2, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, MapPin, Star, Building2, UserCircle2, ArrowRight, ChevronLeft, ChevronRight, BadgeCheck } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,6 +11,10 @@ import { mockDoctors } from "@/lib/mockData";
 export function MedicalDirectory() {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<"doctors" | "hospitals">("doctors");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchLocation, setSearchLocation] = useState("");
+  const [searchType, setSearchType] = useState<"doctors" | "hospitals">("doctors");
+  const [filteredDoctors, setFilteredDoctors] = useState(mockDoctors);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -18,6 +22,21 @@ export function MedicalDirectory() {
       const { current } = scrollRef;
       const scrollAmount = direction === "left" ? -350 : 350;
       current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  const handleSearch = () => {
+    setActiveTab(searchType);
+    if (searchType === "doctors") {
+      const filtered = mockDoctors.filter(doc => {
+        const matchesQuery = !searchQuery || 
+                             doc.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                             doc.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                             doc.hospital.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesLocation = !searchLocation || doc.location.toLowerCase().includes(searchLocation.toLowerCase());
+        return matchesQuery && matchesLocation;
+      });
+      setFilteredDoctors(filtered);
     }
   };
 
@@ -64,32 +83,46 @@ export function MedicalDirectory() {
           </motion.p>
         </div>
 
-        {/* Search Bar Mockup */}
+        {/* Search Bar */}
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto bg-white p-3 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col md:flex-row gap-3 mb-16 relative z-20"
+          className="max-w-5xl mx-auto bg-white p-3 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col md:flex-row gap-3 mb-16 relative z-20"
         >
+          {/* Filter Type */}
+          <div className="flex items-center bg-slate-50 rounded-xl px-4 py-3 md:w-48 border-r border-slate-200/50">
+            <select 
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value as "doctors" | "hospitals")}
+              className="bg-transparent border-none outline-none w-full text-slate-700 font-bold cursor-pointer"
+            >
+              <option value="doctors">{t("Doctors", "ডাক্তার")}</option>
+              <option value="hospitals">{t("Hospitals", "হাসপাতাল")}</option>
+            </select>
+          </div>
+
           <div className="flex-1 flex items-center bg-slate-50 rounded-xl px-4 py-3">
             <Search size={20} className="text-slate-400 mr-3 shrink-0" />
             <input 
               type="text" 
-              placeholder={t("Search doctors, hospitals, specialties...", "ডাক্তার, হাসপাতাল, স্পেশালিটি খুঁজুন...")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={searchType === "doctors" ? t("Search by doctor name or specialty...", "ডাক্তারের নাম বা স্পেশালিটি খুঁজুন...") : t("Search hospitals...", "হাসপাতাল খুঁজুন...")}
               className="bg-transparent border-none outline-none w-full text-slate-700 placeholder:text-slate-400"
-              readOnly
             />
           </div>
           <div className="flex-1 flex items-center bg-slate-50 rounded-xl px-4 py-3">
             <MapPin size={20} className="text-slate-400 mr-3 shrink-0" />
             <input 
               type="text" 
+              value={searchLocation}
+              onChange={(e) => setSearchLocation(e.target.value)}
               placeholder={t("Location (e.g. Dhaka)", "লোকেশন (যেমন: ঢাকা)")}
               className="bg-transparent border-none outline-none w-full text-slate-700 placeholder:text-slate-400"
-              readOnly
             />
           </div>
-          <button className="bg-primary text-white font-bold px-8 py-3 rounded-xl hover:bg-primary-container transition-colors">
+          <button onClick={handleSearch} className="bg-primary text-white font-bold px-8 py-3 rounded-xl hover:bg-primary-container transition-colors">
             {t("Search", "খুঁজুন")}
           </button>
         </motion.div>
@@ -149,14 +182,14 @@ export function MedicalDirectory() {
                   ref={scrollRef}
                   className="flex gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-8 pt-4 px-4 -mx-4"
                 >
-                  {mockDoctors.map((doc) => (
+                  {filteredDoctors.map((doc) => (
                     <motion.div 
                       key={doc.id}
                       whileHover={{ y: -5 }}
                       className="w-[85vw] max-w-[320px] sm:min-w-[320px] snap-center bg-white border border-slate-100 rounded-3xl p-6 shadow-lg shadow-slate-200/40 group hover:border-primary/20 transition-all shrink-0"
                     >
                       <div className="flex items-start justify-between mb-6">
-                        <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-md">
+                        <div className="w-16 h-16 rounded-full overflow-hidden shadow-md ring-2 ring-green-500 ring-offset-2 ring-offset-white">
                           <img src={doc.image} alt={doc.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1 bg-orange-50 text-orange-600 px-2 py-1 rounded-lg text-xs font-bold">
@@ -164,7 +197,10 @@ export function MedicalDirectory() {
                           {doc.rating}
                         </div>
                       </div>
-                      <h3 className="font-bold text-xl text-[#0a1628] mb-1 truncate">{doc.name}</h3>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-bold text-xl text-[#0a1628] truncate">{doc.name}</h3>
+                        {doc.verified && <BadgeCheck size={20} className="text-blue-500 fill-blue-50 shrink-0" />}
+                      </div>
                       <p className="text-primary font-medium text-sm mb-4 truncate">{doc.specialty}</p>
                       
                       <div className="space-y-2 mb-6">
@@ -176,7 +212,7 @@ export function MedicalDirectory() {
                         </div>
                       </div>
 
-                      <Link href={`/doctors/${doc.id}`} className="w-full bg-slate-50 hover:bg-primary hover:text-white text-primary font-bold text-sm py-3 rounded-xl flex items-center justify-center transition-colors">
+                      <Link href={`/doctors/${doc.id}`} className="w-full bg-slate-50 border border-slate-200 hover:border-primary hover:bg-primary hover:text-white text-primary font-bold text-sm py-3 rounded-xl flex items-center justify-center transition-colors">
                         {t("Book Appointment", "অ্যাপয়েন্টমেন্ট বুক করুন")}
                       </Link>
                     </motion.div>
