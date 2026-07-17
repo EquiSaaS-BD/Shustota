@@ -77,7 +77,7 @@ export function Navbar() {
               alt="Shustota AI"
               width={280}
               height={95}
-              className="h-12 sm:h-14 lg:h-[4.5rem] w-auto object-contain transition-all duration-300 scale-100 sm:scale-[1.15] lg:scale-[1.35] origin-left"
+              className="h-14 sm:h-16 lg:h-[4.5rem] w-auto object-contain transition-all duration-300 scale-110 sm:scale-[1.2] lg:scale-[1.35] origin-left"
               priority
             />
           </Link>

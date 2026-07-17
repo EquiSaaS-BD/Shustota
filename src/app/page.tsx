@@ -19,7 +19,7 @@ export default function LandingPage() {
     <>
       <MouseMagneticEffect />
       
-      <div className="min-h-screen bg-white flex flex-col overflow-x-hidden w-full pt-16 sm:pt-20 selection:bg-primary/20 selection:text-primary">
+      <div className="min-h-screen bg-white flex flex-col overflow-x-hidden w-full selection:bg-primary/20 selection:text-primary">
         <Navbar />
 
         <main className="flex-1">
