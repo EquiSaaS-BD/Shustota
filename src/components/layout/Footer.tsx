@@ -99,9 +99,9 @@ export function Footer() {
             <Image
               src="/images/shustota ai logo.png"
               alt="Shustota AI"
-              width={160}
-              height={44}
-              className="h-10 w-auto object-contain brightness-0 invert opacity-80"
+              width={240}
+              height={70}
+              className="h-16 sm:h-20 w-auto object-contain brightness-0 invert opacity-90 mb-2"
             />
             <p className="text-sm leading-relaxed text-white/40 max-w-[320px]">
               Shustota is an AI-powered healthcare platform: offering symptom analysis, expert doctor connections, and verified drug information, completely free.
@@ -156,19 +156,32 @@ export function Footer() {
 
         {/* ── Bottom Bar ── */}
         <div className="py-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/30">
-          <p className="flex flex-wrap items-center gap-1">
-            <span>&copy; {new Date().getFullYear()} Shustota.</span>
-            <span>All rights reserved.</span>
-            <span className="text-white/20">|</span>
-            <span>Developed by</span>
-            <a 
-              href="https://equisaas-bd.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-[#4dd0e1] hover:underline font-bold"
-            >
-              EquiSaaS BD
-            </a>
+          <p className="flex flex-wrap items-center gap-1.5 justify-center sm:justify-start">
+            <span>&copy; {new Date().getFullYear()} Shustota. All rights reserved.</span>
+            <span className="hidden sm:inline text-white/20 px-1">|</span>
+            <span className="w-full sm:w-auto text-center">
+              Powered by{' '}
+              <a 
+                href="https://equisaas-bd.com/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-white hover:text-[#4dd0e1] hover:underline font-bold transition-colors"
+              >
+                EquiSaaS BD Product
+              </a>
+            </span>
+            <span className="hidden sm:inline text-white/20 px-1">|</span>
+            <span className="w-full sm:w-auto text-center">
+              Created by{' '}
+              <a 
+                href="https://wa.me/8801870760751" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-white hover:text-[#4dd0e1] hover:underline font-bold transition-colors"
+              >
+                Rafin
+              </a>
+            </span>
           </p>
           <p className="flex items-center gap-1.5 text-center">
             Not a substitute for professional medical advice
