@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { MedicineBuilder } from "./MedicineBuilder";
 import { PatientContextSidebar } from "./PatientContextSidebar";
 import { usePrescription } from "@/context/PrescriptionContext";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 
 interface SmartEditorAreaProps {
   onFinalize: () => void;
@@ -16,6 +16,20 @@ export function SmartEditorArea({ onFinalize }: SmartEditorAreaProps) {
   const appendToState = (field: keyof typeof data, newText: string) => {
     const currentVal = data[field] as string;
     updateData({ [field]: currentVal ? `${currentVal}, ${newText}` : newText });
+  };
+
+  const [customTest, setCustomTest] = useState("");
+
+  const handleAddInvestigation = (test: string) => {
+    const trimmed = test.trim();
+    if (trimmed && !data.investigationsList?.includes(trimmed)) {
+      updateData({ investigationsList: [...(data.investigationsList || []), trimmed] });
+    }
+    setCustomTest("");
+  };
+
+  const handleRemoveInvestigation = (test: string) => {
+    updateData({ investigationsList: (data.investigationsList || []).filter(t => t !== test) });
   };
 
   return (
@@ -91,20 +105,55 @@ export function SmartEditorArea({ onFinalize }: SmartEditorAreaProps) {
           </div>
 
           {/* Section 5: INVESTIGATIONS (RX) */}
-          <div className="w-full p-4 bg-white border border-slate-200 rounded-[12px] shadow-sm flex flex-col gap-3 transition-colors hover:border-slate-300">
-            <h3 className="text-[16px] font-semibold text-[#111827]">INVESTIGATIONS (RX)</h3>
-            <textarea 
-              value={data.investigations}
-              onChange={(e) => updateData({ investigations: e.target.value })}
-              placeholder="Type investigations..."
-              className="w-full bg-transparent text-[#6B7280] text-[15px] leading-[1.6] placeholder:text-slate-300 resize-none outline-none focus:ring-0 h-[40px]"
-            />
-            <div className="flex flex-wrap gap-2 mt-1">
-              {["CBC", "Blood Sugar", "Lipid Profile", "ECG", "Chest X-Ray", "Urine RME"].map((chip, idx) => (
+          <div className="w-full p-4 bg-white border border-slate-200 rounded-[12px] shadow-sm flex flex-col gap-4 transition-colors hover:border-slate-300">
+            <h3 className="text-[16px] font-semibold text-[#111827]">INVESTIGATIONS (TESTS)</h3>
+            
+            {/* Added Tests List */}
+            {data.investigationsList && data.investigationsList.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {data.investigationsList.map((test, idx) => (
+                  <div key={idx} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-[#2F80ED]/20 text-[#2F80ED] text-[13px] font-bold rounded-lg shadow-sm">
+                    <span className="opacity-50 mr-1 text-[11px]">{idx + 1}.</span> {test}
+                    <button onClick={() => handleRemoveInvestigation(test)} className="ml-1 p-0.5 hover:bg-[#2F80ED]/20 rounded-full transition-colors">
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Custom Test Input */}
+            <div className="flex gap-2">
+              <input 
+                type="text"
+                value={customTest}
+                onChange={(e) => setCustomTest(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddInvestigation(customTest);
+                  }
+                }}
+                placeholder="Type a custom test and press Enter..."
+                className="flex-1 bg-slate-50 border border-slate-200 rounded-[8px] px-3 py-2 text-[14px] text-slate-700 outline-none focus:border-[#2F80ED] focus:ring-1 focus:ring-[#2F80ED]/20 transition-all"
+              />
+              <button 
+                onClick={() => handleAddInvestigation(customTest)}
+                disabled={!customTest.trim()}
+                className="px-4 bg-[#2F80ED] text-white font-bold text-[13px] rounded-[8px] hover:bg-[#256bbd] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add
+              </button>
+            </div>
+
+            {/* Quick Add Chips */}
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+              {["CBC", "Blood Sugar (F)", "Blood Sugar (R)", "Lipid Profile", "ECG", "Chest X-Ray", "Urine RME", "Serum Creatinine"].map((chip, idx) => (
                 <button 
                   key={idx} 
-                  onClick={() => appendToState("investigations", chip)}
-                  className="h-[32px] px-3 bg-slate-50 border border-slate-200 rounded-[8px] text-[12px] font-semibold text-slate-600 hover:bg-[#2F80ED] hover:text-white hover:border-[#2F80ED] transition-colors flex items-center justify-center active:scale-95"
+                  onClick={() => handleAddInvestigation(chip)}
+                  disabled={data.investigationsList?.includes(chip)}
+                  className="h-[32px] px-3 bg-slate-50 border border-slate-200 rounded-[8px] text-[12px] font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center active:scale-95"
                 >
                   + {chip}
                 </button>

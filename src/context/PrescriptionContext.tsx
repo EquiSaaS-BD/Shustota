@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export interface PrescriptionData {
+  id?: string;
   patientId: string;
   patientName: string;
   chiefComplaint: string;
@@ -19,6 +20,7 @@ export interface PrescriptionData {
   };
   diagnosis: string;
   investigations: string;
+  investigationsList: string[];
   medicines: Array<{
     id: string | number;
     name: string;
@@ -32,6 +34,9 @@ export interface PrescriptionData {
   }>;
   advice: string;
   followUp: string;
+  theme: string;
+  customThemeImage: string | null;
+  watermarkImage: string | null;
 }
 
 const initialData: PrescriptionData = {
@@ -51,9 +56,13 @@ const initialData: PrescriptionData = {
   },
   diagnosis: "",
   investigations: "",
+  investigationsList: [],
   medicines: [],
   advice: "",
   followUp: "",
+  theme: "modern",
+  customThemeImage: null,
+  watermarkImage: null,
 };
 
 interface PrescriptionContextType {
@@ -68,35 +77,141 @@ interface PrescriptionContextType {
 const PrescriptionContext = createContext<PrescriptionContextType | undefined>(undefined);
 
 export function PrescriptionProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<PrescriptionData>(initialData);
+  const [data, setData] = useState<PrescriptionData>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        let rawId = params.get('patientId') || "";
+        const pName = params.get('patientName') || "New Patient";
+        
+        // Hash to MRN if needed
+        if (!rawId || rawId.includes('-')) {
+          const firstLetter = pName.charAt(0).toUpperCase();
+          let hash = 0;
+          for (let i = 0; i < pName.length; i++) hash = pName.charCodeAt(i) + ((hash << 5) - hash);
+          const num = Math.abs(hash).toString().padStart(6, '0');
+          rawId = `${firstLetter} ${num.slice(0,2)} ${num.slice(2,4)} ${num.slice(4,6)}`;
+        }
 
-  const updateData = (updates: Partial<PrescriptionData>) => {
-    setData((prev) => ({ ...prev, ...updates }));
+        const savedSession = localStorage.getItem(`shustota_prescription_${rawId}`);
+        if (savedSession) {
+          const parsed = JSON.parse(savedSession);
+          // If we have custom themes globally, merge them
+          const savedImage = localStorage.getItem("shustota_custom_theme");
+          const savedWatermark = localStorage.getItem("shustota_watermark");
+          if (savedImage) parsed.customThemeImage = savedImage;
+          if (savedWatermark) parsed.watermarkImage = savedWatermark;
+          return parsed;
+        }
+
+        // Fallback to load custom theme if no session exists for this patient
+        const savedImage = localStorage.getItem("shustota_custom_theme");
+        const savedWatermark = localStorage.getItem("shustota_watermark");
+        const loadedData = { ...initialData, patientId: rawId, patientName: pName };
+        if (savedImage) loadedData.customThemeImage = savedImage;
+        if (savedWatermark) loadedData.watermarkImage = savedWatermark;
+        return loadedData;
+      } catch (e) {
+        console.error("Failed to load session from localStorage", e);
+      }
+    }
+    return initialData;
+  });
+
+  // Ref to hold debounce timer for DB save
+  const dbSaveTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Fetch from DB on mount
+  React.useEffect(() => {
+    if (data.patientId) {
+      fetch(`/api/prescriptions?mrn=${encodeURIComponent(data.patientId)}`)
+        .then(res => res.json())
+        .then(json => {
+          if (json.data) {
+            // DB has data, override local state
+            setData(prev => {
+              const merged = { ...prev, ...json.data };
+              // Ensure we don't lose local custom theme if not in DB
+              if (!merged.customThemeImage) merged.customThemeImage = prev.customThemeImage;
+              if (!merged.watermarkImage) merged.watermarkImage = prev.watermarkImage;
+              return merged;
+            });
+          }
+        })
+        .catch(err => console.error("Failed to load from DB:", err));
+    }
+  }, [data.patientId]);
+
+  const saveToSession = (updatedData: PrescriptionData) => {
+    if (typeof window !== "undefined" && updatedData.patientId) {
+      try {
+        localStorage.setItem(`shustota_prescription_${updatedData.patientId}`, JSON.stringify(updatedData));
+        // Still save globals
+        if (updatedData.customThemeImage) localStorage.setItem("shustota_custom_theme", updatedData.customThemeImage);
+        else localStorage.removeItem("shustota_custom_theme");
+        
+        if (updatedData.watermarkImage) localStorage.setItem("shustota_watermark", updatedData.watermarkImage);
+        else localStorage.removeItem("shustota_watermark");
+
+        // Debounced save to Database
+        if (dbSaveTimerRef.current) clearTimeout(dbSaveTimerRef.current);
+        dbSaveTimerRef.current = setTimeout(() => {
+          fetch('/api/prescriptions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedData)
+          })
+          .then(res => res.json())
+          .then(resData => {
+             if (resData.prescriptionId && resData.prescriptionId !== updatedData.id) {
+               // Update ID if newly created
+               setData(prev => ({ ...prev, id: resData.prescriptionId }));
+             }
+          })
+          .catch(err => console.error("Failed to save to DB:", err));
+        }, 1500); // 1.5s debounce
+
+      } catch (e) {
+        console.error("Failed to save to localStorage", e);
+      }
+    }
+  };
+
+  const updateData = (newData: Partial<PrescriptionData>) => {
+    setData((prev) => {
+      const updated = { ...prev, ...newData };
+      saveToSession(updated);
+      return updated;
+    });
   };
 
   const updateVitals = (vitalsUpdates: Partial<PrescriptionData["vitals"]>) => {
-    setData((prev) => ({
-      ...prev,
-      vitals: { ...prev.vitals, ...vitalsUpdates },
-    }));
+    setData((prev) => {
+      const updated = { ...prev, vitals: { ...prev.vitals, ...vitalsUpdates } };
+      saveToSession(updated);
+      return updated;
+    });
   };
 
   const addMedicine = (medicine: PrescriptionData["medicines"][0]) => {
-    setData((prev) => ({
-      ...prev,
-      medicines: [...prev.medicines, medicine],
-    }));
+    setData((prev) => {
+      const updated = { ...prev, medicines: [...prev.medicines, medicine] };
+      saveToSession(updated);
+      return updated;
+    });
   };
 
   const removeMedicine = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      medicines: prev.medicines.filter((m) => m.id !== id),
-    }));
+    setData((prev) => {
+      const updated = { ...prev, medicines: prev.medicines.filter((m) => m.id !== id) };
+      saveToSession(updated);
+      return updated;
+    });
   };
 
   const loadPrescription = (newData: PrescriptionData) => {
     setData(newData);
+    saveToSession(newData);
   };
 
   return (

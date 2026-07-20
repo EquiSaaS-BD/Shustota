@@ -44,6 +44,8 @@ interface DoctorContextType {
   previousQueue: QueuePatient[];
   connectedAssistants: any[];
   activityLog: any[];
+  patientPrescriptions: Record<string, any[]>;
+  testReports: Record<string, any[]>;
   
   // Actions
   handleNextPatient: () => void;
@@ -51,16 +53,28 @@ interface DoctorContextType {
   cancelAppointment: (id: string) => void;
   addAssistant: (assistant: any) => void;
   removeAssistant: (id: string) => void;
+  addPatientToHistory: (patient: Patient) => void;
+  addPrescriptionToPatient: (patientId: string, prescriptionData: any) => void;
 }
 
 // Initial Mock Data
 const initialPatients: Patient[] = [
-  { id: "P-10023", name: "Kamal Hossain", age: 45, gender: "Male", type: "Appointment", date: "2026-10-24T09:30:00", status: "Completed", diagnosis: "Hypertension Stage 1", assistant: "Kamrul Hasan", paymentStatus: "Paid", avatar: "K" },
-  { id: "P-10024", name: "Ayesha Siddiqua", age: 28, gender: "Female", type: "Walk-in", date: "2026-10-24T10:15:00", status: "Waiting", diagnosis: "Severe Migraine", assistant: "Aisha Begum", paymentStatus: "Pending", avatar: "A" },
-  { id: "P-10025", name: "Rahim Uddin", age: 52, gender: "Male", type: "Online", date: "2026-10-24T11:00:00", status: "In Progress", diagnosis: "Post-surgery follow up", assistant: "System", paymentStatus: "Paid", avatar: "R" },
-  { id: "P-10026", name: "Nusrat Jahan", age: 34, gender: "Female", type: "Appointment", date: "2026-10-23T16:30:00", status: "Completed", diagnosis: "Viral Fever", assistant: "Kamrul Hasan", paymentStatus: "Paid", avatar: "N" },
-  { id: "P-10027", name: "Abdul Matin", age: 60, gender: "Male", type: "Appointment", date: "2026-10-22T09:00:00", status: "Completed", diagnosis: "Diabetes Type 2", assistant: "System", paymentStatus: "Paid", avatar: "A" },
+  { id: "K 10 23 45", name: "Kamal Hossain", age: 45, gender: "Male", type: "Appointment", date: "2026-10-24T09:30:00", status: "Completed", diagnosis: "Hypertension Stage 1", assistant: "Kamrul Hasan", paymentStatus: "Paid", avatar: "K" },
+  { id: "A 10 24 67", name: "Ayesha Siddiqua", age: 28, gender: "Female", type: "Walk-in", date: "2026-10-24T10:15:00", status: "Waiting", diagnosis: "Severe Migraine", assistant: "Aisha Begum", paymentStatus: "Pending", avatar: "A" },
+  { id: "R 10 25 89", name: "Rahim Uddin", age: 52, gender: "Male", type: "Online", date: "2026-10-24T11:00:00", status: "In Progress", diagnosis: "Post-surgery follow up", assistant: "System", paymentStatus: "Paid", avatar: "R" },
+  { id: "N 10 26 12", name: "Nusrat Jahan", age: 34, gender: "Female", type: "Appointment", date: "2026-10-23T16:30:00", status: "Completed", diagnosis: "Viral Fever", assistant: "Kamrul Hasan", paymentStatus: "Paid", avatar: "N" },
+  { id: "A 10 27 34", name: "Abdul Matin", age: 60, gender: "Male", type: "Appointment", date: "2026-10-22T09:00:00", status: "Completed", diagnosis: "Diabetes Type 2", assistant: "System", paymentStatus: "Paid", avatar: "A" },
 ];
+
+const initialTestReports: Record<string, any[]> = {
+  "K 10 23 45": [
+    { id: "TR-001", date: "2026-10-15", name: "Complete Blood Count (CBC)", status: "Reviewed", summary: "Normal values. Slight decrease in RBC." },
+    { id: "TR-002", date: "2026-10-16", name: "Lipid Profile", status: "Pending Review", summary: "High cholesterol detected. LDL is elevated." }
+  ],
+  "R 10 25 89": [
+    { id: "TR-003", date: "2026-09-20", name: "Chest X-Ray", status: "Reviewed", summary: "Clear lung fields, no abnormalities." }
+  ]
+};
 
 const initialAppointments: Appointment[] = [
   { id: "A-101", token: "S-01", name: "Rahim Uddin", phone: "01711-000000", date: "Today", time: "10:00 AM", type: "First Visit", status: "Completed", bookedBy: "Online", assistant: null },
@@ -99,6 +113,8 @@ export function DoctorProvider({ children }: { children: ReactNode }) {
   ]);
   
   const [activityLog, setActivityLog] = useState(initialActivityLog);
+  const [testReports, setTestReports] = useState<Record<string, any[]>>(initialTestReports);
+  const [patientPrescriptions, setPatientPrescriptions] = useState<Record<string, any[]>>({});
 
   const handleNextPatient = () => {
     if (queue.length === 0) {
@@ -135,6 +151,17 @@ export function DoctorProvider({ children }: { children: ReactNode }) {
     setConnectedAssistants((prev) => prev.filter(a => a.id !== id));
   };
 
+  const addPatientToHistory = (patient: Patient) => {
+    setPatients((prev) => [patient, ...prev]);
+  };
+
+  const addPrescriptionToPatient = (patientId: string, prescriptionData: any) => {
+    setPatientPrescriptions((prev) => ({
+      ...prev,
+      [patientId]: [prescriptionData, ...(prev[patientId] || [])]
+    }));
+  };
+
   return (
     <DoctorContext.Provider value={{
       patients,
@@ -143,11 +170,15 @@ export function DoctorProvider({ children }: { children: ReactNode }) {
       previousQueue,
       connectedAssistants,
       activityLog,
+      patientPrescriptions,
+      testReports,
       handleNextPatient,
       handleUndoPatient,
       cancelAppointment,
       addAssistant,
-      removeAssistant
+      removeAssistant,
+      addPatientToHistory,
+      addPrescriptionToPatient
     }}>
       {children}
     </DoctorContext.Provider>

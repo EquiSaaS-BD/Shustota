@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Patient {
+  id            String         @id @default(uuid())
+  mrn           String         @unique // e.g. R 36 53 02
+  name          String
+  age           Int?
+  gender        String?
+  phone         String?
+  prescriptions Prescription[]
+  labReports    LabReport[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Prescription {
+  id                 String   @id @default(uuid())
+  patientId          String
+  patient            Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  chiefComplaint     String?  @db.Text
+  physicalExam       String?  @db.Text
+  vitals             Json?    
+  diagnosis          String?  @db.Text
+  investigations     String?  @db.Text
+  investigationsList Json?    
+  medicines          Json?    
+  advice             String?  @db.Text
+  followUp           String?
+  theme              String?  @default("modern")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model LabReport {
+  id        String   @id @default(uuid())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  name      String
+  type      String
+  date      DateTime
+  status    String   @default("Pending")
+  pages     Int      @default(1)
+  fileUrl   String?
+  createdAt DateTime @default(now())
+}

@@ -5,10 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Calendar, MapPin, User, Activity, FileText, ChevronRight, CheckCircle2, AlertCircle, Download, Clock, ChevronLeft, ChevronDown } from 'lucide-react';
 import { useDoctor } from '@/context/DoctorContext';
 import { toast } from 'sonner';
+import { PatientDetailsDrawer } from '@/components/patients/PatientDetailsDrawer';
 
 export default function DoctorPatientsPage() {
   const { patients } = useDoctor();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [activeFilter, setActiveFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [dateRange, setDateRange] = useState("All Time");
@@ -172,7 +174,10 @@ export default function DoctorPatientsPage() {
                       {patient.status === "In Progress" && <span className="inline-flex items-center gap-1 text-[#2F80ED] bg-[#2F80ED]/10 px-2.5 py-1 rounded-md text-[12px] font-bold"><Activity size={12} className="animate-pulse"/> In Progress</span>}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-[13px] font-bold shadow-sm hover:bg-primary hover:text-white hover:border-primary transition-all">
+                      <button 
+                        onClick={() => setSelectedPatient(patient)}
+                        className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-[13px] font-bold shadow-sm hover:bg-primary hover:text-white hover:border-primary transition-all"
+                      >
                         View Details
                       </button>
                     </td>
@@ -209,6 +214,11 @@ export default function DoctorPatientsPage() {
         )}
       </div>
 
+      <PatientDetailsDrawer 
+        isOpen={!!selectedPatient}
+        onClose={() => setSelectedPatient(null)}
+        patient={selectedPatient}
+      />
     </div>
   );
 }
