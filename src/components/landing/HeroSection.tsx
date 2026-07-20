@@ -40,7 +40,7 @@ export function HeroSection() {
         <div className="absolute inset-0 z-0 w-full h-full pointer-events-none">
           <video
             ref={video1Ref}
-            src="/videos/hero-background-2.mp4"
+            src="/videos/Langing-page-video.mp4"
             autoPlay
             muted
             playsInline
@@ -51,7 +51,7 @@ export function HeroSection() {
           />
           <video
             ref={video2Ref}
-            src="/videos/hero-background-2.mp4"
+            src="/videos/Langing-page-video.mp4"
             muted
             playsInline
             onTimeUpdate={activeVideo === 2 ? handleTimeUpdate : undefined}

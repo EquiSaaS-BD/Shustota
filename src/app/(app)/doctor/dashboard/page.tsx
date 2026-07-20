@@ -6,6 +6,8 @@ import { Users, Clock, MonitorPlay, UserCheck, Activity, Smartphone, Plus, X, To
 import Image from 'next/image';
 import Link from 'next/link';
 import { toast, Toaster } from 'sonner';
+import { useDoctor } from '@/context/DoctorContext';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const stats = [
   { title: "Today's Appointments", count: "42", icon: Users, color: "text-[#2F80ED]", bg: "bg-[#2F80ED]/10" },
@@ -16,14 +18,14 @@ const stats = [
   { title: "Revenue", count: "৳28K", icon: MonitorPlay, color: "text-slate-700", bg: "bg-slate-100" },
 ];
 
-const activityLog = [
-  { time: "09:15", name: "Kamrul Hasan", action: "Checked In", token: "S-021", status: "Completed", color: "text-[#22C55E]" },
-  { time: "09:18", name: "Kamrul Hasan", action: "Called Next Patient", token: "S-022", status: "Completed", color: "text-[#22C55E]" },
-  { time: "09:20", name: "Kamrul Hasan", action: "Rescheduled Appointment", token: "S-025", status: "Completed", color: "text-[#2F80ED]" },
-  { time: "09:25", name: "Aisha Begum", action: "Emergency Case Inserted", token: "E-01", status: "Alert", color: "text-[#EF4444]" },
-  { time: "09:30", name: "Kamrul Hasan", action: "Payment Collected", token: "S-022", status: "Completed", color: "text-[#22C55E]" },
-  { time: "09:45", name: "Kamrul Hasan", action: "Paused Queue", token: "-", status: "Warning", color: "text-[#F59E0B]" },
-  { time: "10:00", name: "Kamrul Hasan", action: "Resumed Queue", token: "-", status: "Completed", color: "text-[#22C55E]" },
+const chartData = [
+  { name: 'Mon', patients: 35 },
+  { name: 'Tue', patients: 42 },
+  { name: 'Wed', patients: 28 },
+  { name: 'Thu', patients: 50 },
+  { name: 'Fri', patients: 45 },
+  { name: 'Sat', patients: 65 },
+  { name: 'Sun', patients: 58 },
 ];
 
 export default function DoctorDashboardPage() {
@@ -33,20 +35,10 @@ export default function DoctorDashboardPage() {
   const [inviteRole, setInviteRole] = useState("Front Desk / Receptionist");
   const [isInviting, setIsInviting] = useState(false);
   
-  // Dynamic Queue State
-  const [queue, setQueue] = useState([
-    { token: "S-01", name: "Rahim Uddin", info: "First Visit • Fever, Cough" },
-    { token: "S-02", name: "Fatema Begum", info: "Follow Up • Headache" },
-    { token: "S-03", name: "Karim Ali", info: "Report Showing" },
-    { token: "S-04", name: "Nasima Akter", info: "First Visit" }
-  ]);
-  const [previousQueue, setPreviousQueue] = useState<{ token: string, name: string, info: string }[]>([]);
-  
-  // Real or mock data for connected assistants
-  const [connectedAssistants, setConnectedAssistants] = useState([
-    { id: "100010001000", name: "Kamrul Hasan", status: "Online (Front Desk)", color: "text-[#22C55E]", bg: "bg-[#22C55E]", isPending: false },
-    { id: "200020002000", name: "Aisha Begum", status: "Offline (Shift ended)", color: "text-slate-400", bg: "bg-slate-200", isPending: false }
-  ]);
+  const { 
+    queue, previousQueue, connectedAssistants, activityLog, 
+    handleNextPatient, handleUndoPatient, addAssistant, removeAssistant 
+  } = useDoctor();
 
   const [permissions, setPermissions] = useState({
     apt: true, queue: true, walkin: true, pay: true, notif: true, cal: true, 
@@ -82,9 +74,8 @@ export default function DoctorDashboardPage() {
       isPending: true
     };
     
-    setConnectedAssistants([newAst, ...connectedAssistants]);
+    addAssistant(newAst);
     
-    // Save to local storage for the assistant to see
     const invitesStr = localStorage.getItem('shustota_invites');
     const invites = invitesStr ? JSON.parse(invitesStr) : [];
     invites.push({ id: Date.now().toString(), assistantId: inviteId, email: inviteEmail, role: inviteRole, status: 'pending' });
@@ -97,62 +88,12 @@ export default function DoctorDashboardPage() {
   };
 
   const handleRemoveAssistant = (id: string) => {
-    setConnectedAssistants(prev => prev.filter(a => a.id !== id));
+    removeAssistant(id);
     toast.success("Assistant removed.");
     
-    // Create a notification for the assistant
     const notifsStr = localStorage.getItem('shustota_notifications');
     const notifs = notifsStr ? JSON.parse(notifsStr) : [];
     notifs.push({ id: Date.now().toString(), targetId: id, message: "You have been removed by Dr. Sarah.", read: false });
-    localStorage.setItem('shustota_notifications', JSON.stringify(notifs));
-  };
-
-  const handleNextPatient = async () => {
-    if (queue.length === 0) {
-      toast.error("No more patients in the queue.");
-      return;
-    }
-    
-    const completedPatient = queue[0];
-    const completedToken = completedPatient.token;
-    const nextToken = queue[1]?.token || "None";
-    
-    setPreviousQueue([completedPatient, ...previousQueue]);
-    setQueue(prev => prev.slice(1));
-    toast.success("Next patient called successfully!", { style: { background: '#22C55E', color: 'white' }});
-    
-    // Send notification to assistant
-    const notifsStr = localStorage.getItem('shustota_notifications');
-    const notifs = notifsStr ? JSON.parse(notifsStr) : [];
-    notifs.push({ 
-      id: Date.now().toString(), 
-      targetId: 'assistant', 
-      message: `Doctor completed ${completedToken} and called ${nextToken}. Please send them in.`, 
-      read: false 
-    });
-    localStorage.setItem('shustota_notifications', JSON.stringify(notifs));
-  };
-
-  const handleUndoPatient = () => {
-    if (previousQueue.length === 0) {
-      toast.error("No previous patient to return to.");
-      return;
-    }
-
-    const lastPatient = previousQueue[0];
-    setPreviousQueue(prev => prev.slice(1));
-    setQueue([lastPatient, ...queue]);
-    
-    toast.success("Reverted to previous patient.");
-    
-    const notifsStr = localStorage.getItem('shustota_notifications');
-    const notifs = notifsStr ? JSON.parse(notifsStr) : [];
-    notifs.push({ 
-      id: Date.now().toString(), 
-      targetId: 'assistant', 
-      message: `Doctor reverted the queue to ${lastPatient.token}.`, 
-      read: false 
-    });
     localStorage.setItem('shustota_notifications', JSON.stringify(notifs));
   };
 
@@ -321,6 +262,37 @@ export default function DoctorDashboardPage() {
             </div>
           </motion.div>
         </div>
+      </div>
+
+      {/* Analytics Chart */}
+      <div className="grid grid-cols-1 mt-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-[20px] shadow-sm border border-slate-100 p-6"
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-[18px] font-bold text-slate-800">Weekly Patient Flow</h3>
+            <select className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-700 outline-none">
+              <option>This Week</option>
+              <option>Last Week</option>
+            </select>
+          </div>
+          <div className="w-full h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <Line type="monotone" dataKey="patients" stroke="#2F80ED" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff", stroke: "#2F80ED" }} activeDot={{ r: 6, fill: "#2F80ED" }} />
+                <CartesianGrid stroke="#f1f5f9" strokeDasharray="5 5" vertical={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 13 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 13 }} dx={-10} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}
+                  itemStyle={{ color: '#2F80ED', fontWeight: 'bold' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
       </div>
 
       {/* Assistant Activity Log */}

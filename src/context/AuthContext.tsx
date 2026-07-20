@@ -10,6 +10,7 @@ interface User {
   name: string;
   role: UserRole;
   email: string;
+  image?: string;
 }
 
 interface AuthContextType {
@@ -18,6 +19,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (userData: User) => void;
   logout: () => void;
+  updateUser: (userData: User) => void;
   isLoading: boolean;
 }
 
@@ -47,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Route based on role
     if (userData.role === 'patient') {
-      router.push('/patient/dashboard');
+      router.push('/chat'); // Patient Dashboard is the AI Chat Interface
     } else if (userData.role === 'doctor') {
       router.push('/doctor/dashboard'); // Doctor dashboard
     } else if (userData.role === 'hospital') {
@@ -67,6 +69,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
+  const updateUser = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem('shustota_user', JSON.stringify(userData));
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -75,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user,
         login,
         logout,
+        updateUser,
         isLoading
       }}
     >

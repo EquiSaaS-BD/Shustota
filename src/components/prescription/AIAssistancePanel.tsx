@@ -83,7 +83,7 @@ export function AIAssistancePanel() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-[16px] border border-[#E5E7EB] shadow-[0_4px_16px_rgba(15,23,42,0.08)] overflow-hidden relative">
+    <div className="flex flex-col min-h-[500px] xl:h-full bg-transparent rounded-[16px] xl:rounded-none border border-[#E5E7EB] xl:border-none shadow-[0_4px_16px_rgba(15,23,42,0.08)] xl:shadow-none overflow-hidden relative">
       
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-4 text-white flex items-center justify-between shrink-0 shadow-sm z-10">
@@ -95,7 +95,7 @@ export function AIAssistancePanel() {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 flex flex-col gap-6 bg-[#F8FAFC]">
+      <div className="flex-1 overflow-visible xl:overflow-y-auto custom-scrollbar p-5 flex flex-col gap-6 bg-transparent">
         {messages.length === 0 ? (
           /* Default State */
           <div className="flex flex-col items-center justify-center h-full text-center mt-4">

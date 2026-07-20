@@ -6,6 +6,7 @@ import { PatientContextSidebar } from "@/components/prescription/PatientContextS
 import { SmartEditorArea } from "@/components/prescription/SmartEditorArea";
 import { PrescriptionTopbar } from "@/components/prescription/PrescriptionTopbar";
 import { AIAssistancePanel } from "@/components/prescription/AIAssistancePanel";
+import { PrescriptionProvider } from "@/context/PrescriptionContext";
 import { TemplateExportModal } from "@/components/prescription/TemplateExportModal";
 import { PrescriptionPreviewModal } from "@/components/prescription/PrescriptionPreviewModal";
 
@@ -14,10 +15,9 @@ export default function NewPrescriptionPage() {
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   return (
-    <>
+    <PrescriptionProvider>
       <PrescriptionEditorLayout
         topbar={<PrescriptionTopbar onFinalize={() => setIsExportModalOpen(true)} onPreview={() => setIsPreviewModalOpen(true)} />}
-        sidebar={<PatientContextSidebar />}
         editor={<SmartEditorArea onFinalize={() => setIsExportModalOpen(true)} />}
         aiPanel={<AIAssistancePanel />}
       />
@@ -31,6 +31,6 @@ export default function NewPrescriptionPage() {
         isOpen={isPreviewModalOpen}
         onClose={() => setIsPreviewModalOpen(false)}
       />
-    </>
+    </PrescriptionProvider>
   );
 }

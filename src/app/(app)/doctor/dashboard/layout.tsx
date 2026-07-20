@@ -7,6 +7,7 @@ import { DoctorSidebar } from "@/components/doctor/DoctorSidebar";
 import { DoctorHeader } from "@/components/doctor/DoctorHeader";
 import { AccessDeniedModal } from "@/components/doctor/AccessDeniedModal";
 import { DoctorDashboardSkeleton } from "@/components/doctor/DoctorDashboardSkeleton";
+import { DoctorProvider } from "@/context/DoctorContext";
 import { Toaster } from "sonner";
 
 export default function DoctorDashboardLayout({
@@ -39,24 +40,26 @@ export default function DoctorDashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      <Toaster position="top-right" richColors closeButton />
+    <DoctorProvider>
+      <div className="flex h-screen bg-slate-50 overflow-hidden">
+        <Toaster position="top-right" richColors closeButton />
 
-      {/* Sidebar */}
-      <DoctorSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        {/* Sidebar */}
+        <DoctorSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        {/* Header */}
-        {!isPrescriptionEditor && (
-          <DoctorHeader onMenuClick={() => setSidebarOpen(true)} />
-        )}
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+          {/* Header */}
+          {!isPrescriptionEditor && (
+            <DoctorHeader onMenuClick={() => setSidebarOpen(true)} />
+          )}
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+          {/* Page Content */}
+          <main className="flex-1 overflow-y-auto">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </DoctorProvider>
   );
 }

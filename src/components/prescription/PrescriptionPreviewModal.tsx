@@ -1,6 +1,7 @@
 import React from "react";
-import { X, Printer, Download } from "lucide-react";
+import { X, Printer, Download, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePrescription } from "@/context/PrescriptionContext";
 
 interface PrescriptionPreviewModalProps {
   isOpen: boolean;
@@ -8,6 +9,8 @@ interface PrescriptionPreviewModalProps {
 }
 
 export function PrescriptionPreviewModal({ isOpen, onClose }: PrescriptionPreviewModalProps) {
+  const { data } = usePrescription();
+  
   if (!isOpen) return null;
 
   return (
@@ -23,6 +26,9 @@ export function PrescriptionPreviewModal({ isOpen, onClose }: PrescriptionPrevie
           <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0">
             <h2 className="text-lg font-bold text-slate-800">Prescription Preview</h2>
             <div className="flex items-center gap-3">
+              <button className="flex items-center gap-2 text-sm font-bold text-slate-600 bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-100 transition-colors">
+                <Settings size={16} /> Template
+              </button>
               <button className="flex items-center gap-2 text-sm font-bold text-slate-600 bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-100 transition-colors">
                 <Printer size={16} /> Print
               </button>
@@ -78,85 +84,113 @@ export function PrescriptionPreviewModal({ isOpen, onClose }: PrescriptionPrevie
               <div className="flex-1 flex gap-8">
                 {/* Left Column: Vitals, CC, Diagnosis, Inv */}
                 <div className="w-[35%] flex flex-col gap-6 border-r border-slate-200 pr-8">
-                  <div>
-                    <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-2">Vitals</h3>
-                    <ul className="text-[13px] text-slate-700 flex flex-col gap-1.5">
-                      <li><span className="font-semibold">BP:</span> 120/80 mmHg</li>
-                      <li><span className="font-semibold">Pulse:</span> 72 bpm</li>
-                      <li><span className="font-semibold">Temp:</span> 98.6 °F</li>
-                      <li><span className="font-semibold">Weight:</span> 76 kg</li>
-                    </ul>
-                  </div>
+                  {/* Vitals */}
+                  {(data.vitals.bp || data.vitals.pulse || data.vitals.temp || data.vitals.weight) && (
+                    <div>
+                      <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-2">Vitals</h3>
+                      <ul className="text-[13px] text-slate-700 flex flex-col gap-1.5">
+                        {data.vitals.bp && <li><span className="font-semibold">BP:</span> {data.vitals.bp} mmHg</li>}
+                        {data.vitals.pulse && <li><span className="font-semibold">Pulse:</span> {data.vitals.pulse} bpm</li>}
+                        {data.vitals.temp && <li><span className="font-semibold">Temp:</span> {data.vitals.temp} °F</li>}
+                        {data.vitals.weight && <li><span className="font-semibold">Weight:</span> {data.vitals.weight} kg</li>}
+                        {data.vitals.height && <li><span className="font-semibold">Height:</span> {data.vitals.height} cm</li>}
+                        {data.vitals.bmi && <li><span className="font-semibold">BMI:</span> {data.vitals.bmi} kg/m²</li>}
+                        {data.vitals.bloodSugar && <li><span className="font-semibold">Blood Sugar:</span> {data.vitals.bloodSugar} mg/dL</li>}
+                        {data.vitals.spo2 && <li><span className="font-semibold">SpO2:</span> {data.vitals.spo2} %</li>}
+                      </ul>
+                    </div>
+                  )}
 
-                  <div>
-                    <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-2">Chief Complaint</h3>
-                    <p className="text-[13px] text-slate-700 leading-relaxed">Fever for 3 days, mild headache, weakness.</p>
-                  </div>
+                  {/* Chief Complaint */}
+                  {data.chiefComplaint && (
+                    <div>
+                      <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-2">Chief Complaint</h3>
+                      <p className="text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap">{data.chiefComplaint}</p>
+                    </div>
+                  )}
 
-                  <div>
-                    <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-2">Diagnosis</h3>
-                    <p className="text-[13px] text-slate-700 leading-relaxed font-semibold">Viral Fever</p>
-                  </div>
+                  {/* Physical Exam */}
+                  {data.physicalExam && (
+                    <div>
+                      <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-2">Physical Exam</h3>
+                      <p className="text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap">{data.physicalExam}</p>
+                    </div>
+                  )}
 
-                  <div>
-                    <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-2">Investigations</h3>
-                    <ul className="text-[13px] text-slate-700 list-disc pl-4 flex flex-col gap-1">
-                      <li>CBC</li>
-                      <li>Dengue NS1</li>
-                      <li>Urine RME</li>
-                    </ul>
-                  </div>
+                  {/* Diagnosis */}
+                  {data.diagnosis && (
+                    <div>
+                      <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-2">Diagnosis</h3>
+                      <p className="text-[13px] text-slate-700 leading-relaxed font-semibold whitespace-pre-wrap">{data.diagnosis}</p>
+                    </div>
+                  )}
+
+                  {/* Investigations */}
+                  {data.investigations && (
+                    <div>
+                      <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-2">Investigations</h3>
+                      <p className="text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap">{data.investigations}</p>
+                    </div>
+                  )}
                 </div>
 
-                {/* Right Column: Rx Medicines & Advice */}
-                <div className="w-[65%] flex flex-col gap-8">
-                  {/* Rx Symbol */}
-                  <div className="text-4xl font-serif font-bold text-slate-800 mb-2">Rx.</div>
+                {/* Right Column: Rx, Advice, Follow-up */}
+                <div className="w-[65%] flex flex-col gap-8 pl-8">
                   
-                  {/* Medicine List */}
-                  <div className="flex flex-col gap-5">
-                    <div>
-                      <h4 className="text-[15px] font-bold text-slate-800">1. Tab. Napa Extra 500mg</h4>
-                      <div className="flex items-center gap-4 text-[13px] text-slate-600 mt-1 ml-4">
-                        <span className="font-bold text-slate-800">1 + 0 + 1</span>
-                        <span>(Daily)</span>
-                        <span>5 Days</span>
-                        <span className="italic text-slate-500">After meal</span>
+                  {/* Rx Symbol & Medicines */}
+                  <div className="flex-1">
+                    <h1 className="text-4xl font-serif font-bold text-slate-800 mb-6 relative -left-1">Rx</h1>
+                    
+                    {data.medicines.length > 0 ? (
+                      <div className="flex flex-col gap-6">
+                        {data.medicines.map((med, index) => (
+                          <div key={index} className="flex gap-4">
+                            <span className="text-sm font-bold text-slate-400 mt-0.5">{index + 1}.</span>
+                            <div className="flex-1">
+                              <h4 className="text-[15px] font-bold text-slate-800 mb-1">{med.name}</h4>
+                              <div className="flex items-center gap-3 text-[13px] text-slate-600">
+                                <span className="font-semibold text-[#2F80ED]">{med.dosageM}+{med.dosageN}+{med.dosageE}</span>
+                                <span className="w-1 h-1 rounded-full bg-slate-300" />
+                                <span>{med.frequency}</span>
+                                <span className="w-1 h-1 rounded-full bg-slate-300" />
+                                <span className="font-semibold text-slate-800">{med.duration}</span>
+                              </div>
+                              {med.notes && (
+                                <p className="text-[12px] text-slate-500 mt-1 italic">{med.notes}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-[15px] font-bold text-slate-800">2. Cap. Seclo 20mg</h4>
-                      <div className="flex items-center gap-4 text-[13px] text-slate-600 mt-1 ml-4">
-                        <span className="font-bold text-slate-800">1 + 0 + 1</span>
-                        <span>(Daily)</span>
-                        <span>14 Days</span>
-                        <span className="italic text-slate-500">Before meal</span>
-                      </div>
-                    </div>
+                    ) : (
+                      <p className="text-sm text-slate-400 italic">No medicines prescribed.</p>
+                    )}
                   </div>
 
-                  {/* Advice */}
-                  <div className="mt-8">
-                    <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-3">Advice</h3>
-                    <ul className="text-[14px] text-slate-700 list-decimal pl-4 flex flex-col gap-2 leading-relaxed">
-                      <li>Drink plenty of water (at least 2.5 Liters a day).</li>
-                      <li>Take complete bed rest for the next 3 days.</li>
-                      <li>Avoid cold items and outside food.</li>
-                    </ul>
+                  {/* Advice & Follow-up */}
+                  <div className="flex flex-col gap-6 mt-auto pt-8">
+                    {data.advice && (
+                      <div>
+                        <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-3">Advice</h3>
+                        <p className="text-[13px] text-slate-700 leading-relaxed whitespace-pre-wrap">{data.advice}</p>
+                      </div>
+                    )}
+                    
+                    {data.followUp && (
+                      <div>
+                        <h3 className="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1 mb-2">Follow-up</h3>
+                        <p className="text-[13px] text-slate-700 font-semibold text-[#2F80ED] whitespace-pre-wrap">{data.followUp}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* Footer */}
               <div className="mt-12 pt-6 border-t border-slate-200 flex justify-between items-end">
-                <div>
-                  <h3 className="text-xs font-bold uppercase text-slate-800 mb-1">Follow-up</h3>
-                  <p className="text-sm font-semibold text-[#2F80ED]">After 7 Days (24 July 2026)</p>
-                </div>
                 <div className="text-center">
                   <div className="w-40 border-b border-slate-800 mb-2"></div>
-                  <p className="text-xs font-semibold text-slate-600 uppercase">Doctor's Signature</p>
+                  <p className="text-xs font-semibold text-slate-600 uppercase">Doctor&apos;s Signature</p>
                 </div>
               </div>
 

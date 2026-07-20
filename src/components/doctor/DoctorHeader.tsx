@@ -155,22 +155,6 @@ export function DoctorHeader({ onMenuClick }: DoctorHeaderProps) {
           )}
         </div>
 
-        {/* Separator */}
-        <div className="w-px h-8 bg-slate-200 mx-1 hidden md:block" />
-
-        {/* Doctor Profile */}
-        <div className="flex items-center gap-2.5 pl-1">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white text-sm font-semibold">
-            {user?.name?.charAt(0) || "D"}
-          </div>
-          <div className="hidden md:block">
-            <p className="text-[13px] font-semibold text-slate-800 leading-tight">{user?.name || "Doctor"}</p>
-            <div className="flex items-center gap-1">
-              <ShieldCheck size={11} className="text-emerald-500" />
-              <span className="text-[10.5px] text-emerald-600 font-medium">Verified</span>
-            </div>
-          </div>
-        </div>
       </div>
     </header>
   );

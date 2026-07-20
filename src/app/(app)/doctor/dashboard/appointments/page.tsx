@@ -8,20 +8,12 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, Toaster } from "sonner";
 
-// Mock Data for Appointments
-const mockAppointments = [
-  { id: "A-101", token: "S-01", name: "Rahim Uddin", phone: "01711-000000", date: "Today", time: "10:00 AM", type: "First Visit", status: "Completed", bookedBy: "Online", assistant: null },
-  { id: "A-102", token: "S-02", name: "Fatema Begum", phone: "01811-000000", date: "Today", time: "10:15 AM", type: "Follow Up", status: "Waiting", bookedBy: "Assistant", assistant: "Kamrul Hasan" },
-  { id: "A-103", token: "S-03", name: "Karim Ali", phone: "01911-000000", date: "Today", time: "10:30 AM", type: "Report Showing", status: "Upcoming", bookedBy: "Assistant", assistant: "Kamrul Hasan" },
-  { id: "A-104", token: "T-01", name: "Nasima Akter", phone: "01722-000000", date: "Tomorrow", time: "05:00 PM", type: "First Visit", status: "Upcoming", bookedBy: "Online", assistant: null },
-  { id: "A-105", token: "T-02", name: "Jashim Uddin", phone: "01611-000000", date: "Tomorrow", time: "05:15 PM", type: "Follow Up", status: "Upcoming", bookedBy: "Assistant", assistant: "Aisha Begum" },
-  { id: "A-106", token: "Y-01", name: "Rubina Yasmin", phone: "01511-000000", date: "Yesterday", time: "11:00 AM", type: "First Visit", status: "Completed", bookedBy: "Online", assistant: null },
-];
+import { useDoctor } from "@/context/DoctorContext";
 
 export default function DoctorAppointmentsPage() {
   const [activeTab, setActiveTab] = useState<"Today" | "Upcoming" | "Past">("Today");
   const [searchQuery, setSearchQuery] = useState("");
-  const [appointments, setAppointments] = useState(mockAppointments);
+  const { appointments, cancelAppointment } = useDoctor();
   
   // Modals / Dropdowns
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
@@ -40,12 +32,9 @@ export default function DoctorAppointmentsPage() {
     return matchSearch && matchTab;
   });
 
-  const handleCancelAppointment = (id: string) => {
-    setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: "Cancelled", date: "Yesterday" } : a));
+  const handleCancelAppointmentLocal = (id: string) => {
+    cancelAppointment(id);
     setActionMenuOpen(null);
-    toast.error("Appointment Cancelled");
-    
-    // Notify assistant logic
     const notifsStr = localStorage.getItem('shustota_notifications');
     const notifs = notifsStr ? JSON.parse(notifsStr) : [];
     notifs.push({ 
@@ -117,13 +106,30 @@ export default function DoctorAppointmentsPage() {
       <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden">
         
         {filteredAppointments.length === 0 ? (
-          <div className="py-20 flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-              <CalendarClock size={32} className="text-slate-300" />
-            </div>
-            <h3 className="text-[18px] font-bold text-slate-700 mb-1">No appointments found</h3>
-            <p className="text-[14px] text-slate-500">There are no {activeTab.toLowerCase()} appointments matching your criteria.</p>
-          </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center py-24 px-4 text-center bg-white rounded-3xl border border-slate-100 border-dashed"
+            >
+              <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+                <Calendar className="w-12 h-12 text-slate-300" />
+              </div>
+              <h3 className="text-[20px] font-bold text-slate-700 mb-2">No Appointments Found</h3>
+              <p className="text-slate-500 max-w-md mx-auto text-[15px]">
+                {searchQuery 
+                  ? `No appointments found matching "${searchQuery}"`
+                  : `You don't have any appointments scheduled for ${activeTab.toLowerCase()}.`
+                }
+              </p>
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery("")}
+                  className="mt-6 px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors"
+                >
+                  Clear Search
+                </button>
+              )}
+            </motion.div>
         ) : (
           <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full text-left border-collapse min-w-[1000px]">
@@ -228,7 +234,7 @@ export default function DoctorAppointmentsPage() {
                                 <Edit size={14} /> Reschedule
                               </button>
                               {apt.status !== "Cancelled" && apt.status !== "Completed" && (
-                                <button onClick={() => handleCancelAppointment(apt.id)} className="w-full px-4 py-2.5 text-[13px] font-bold text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                <button onClick={() => handleCancelAppointmentLocal(apt.id)} className="w-full px-4 py-2.5 text-[13px] font-bold text-red-600 hover:bg-red-50 flex items-center gap-2">
                                   <XCircle size={14} /> Cancel Appointment
                                 </button>
                               )}

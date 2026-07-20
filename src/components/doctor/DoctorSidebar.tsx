@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard,
@@ -48,6 +49,12 @@ export function DoctorSidebar({ isOpen, onClose }: DoctorSidebarProps) {
     if (href === "/doctor/dashboard") return pathname === href;
     return pathname.startsWith(href);
   };
+
+  useEffect(() => {
+    if (pathname.includes("/prescription/new")) {
+      setIsCollapsed(true);
+    }
+  }, [pathname]);
 
   return (
     <>
@@ -102,24 +109,6 @@ export function DoctorSidebar({ isOpen, onClose }: DoctorSidebarProps) {
           </button>
         </div>
 
-        {/* Doctor Quick Profile */}
-        <div className={`px-4 py-4 border-b border-slate-100 shrink-0 ${isCollapsed ? 'flex justify-center' : ''}`}>
-          <div className={`flex items-center gap-3 bg-gradient-to-r from-primary/5 to-blue-50 rounded-xl ${isCollapsed ? 'p-1.5' : 'p-3'}`}>
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
-              {user?.name?.charAt(0) || "D"}
-            </div>
-            {!isCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 truncate">{user?.name || "Doctor"}</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <ShieldCheck size={12} className="text-emerald-500" />
-                  <span className="text-[11px] text-emerald-600 font-medium">Verified Doctor</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 scrollbar-thin">
           {navItems.map((item) => {
@@ -160,7 +149,7 @@ export function DoctorSidebar({ isOpen, onClose }: DoctorSidebarProps) {
           {/* Logout */}
           <button
             onClick={logout}
-            className={`flex items-center gap-3 py-2.5 rounded-xl text-[13.5px] font-medium text-red-500 hover:bg-red-50 transition-colors w-full
+            className={`flex items-center gap-3 py-2.5 rounded-xl text-[13.5px] font-medium text-red-500 hover:bg-red-50 transition-colors w-full mb-4
               ${isCollapsed ? 'justify-center px-0' : 'px-3'}
             `}
             title={isCollapsed ? "Logout" : undefined}
@@ -168,6 +157,22 @@ export function DoctorSidebar({ isOpen, onClose }: DoctorSidebarProps) {
             <LogOut size={18} strokeWidth={1.8} className="shrink-0" />
             {!isCollapsed && <span>Logout</span>}
           </button>
+          
+          {/* Doctor Profile (Moved to bottom) */}
+          <div className={`flex items-center gap-3 bg-gradient-to-r from-primary/5 to-blue-50 rounded-xl ${isCollapsed ? 'p-1.5 justify-center' : 'p-3'}`}>
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
+              {user?.name?.charAt(0) || "D"}
+            </div>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-800 truncate">{user?.name || "Doctor"}</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <ShieldCheck size={12} className="text-emerald-500" />
+                  <span className="text-[11px] text-emerald-600 font-medium">Verified Doctor</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </aside>
     </>

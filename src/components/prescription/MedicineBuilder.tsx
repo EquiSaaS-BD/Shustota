@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import { Plus, Search, Trash2, GripVertical, Info, Mic, Sparkles } from "lucide-react";
+import { usePrescription } from "@/context/PrescriptionContext";
 
 export function MedicineBuilder() {
-  const [medicines, setMedicines] = useState([
-    { id: 1, name: "Tab. Napa Extra 500mg", type: "Tablet", dosageM: "1", dosageN: "0", dosageE: "1", frequency: "Daily", duration: "5 Days", notes: "After meal" }
-  ]);
+  const { data, updateData } = usePrescription();
+  const medicines = data.medicines;
+  
+  const setMedicines = (newMedicines: typeof data.medicines) => {
+    updateData({ medicines: newMedicines });
+  };
+
   const [searchInput, setSearchInput] = useState("");
 
   const addEmptyMedicine = () => {
@@ -31,11 +36,11 @@ export function MedicineBuilder() {
     }]);
   };
 
-  const removeMedicine = (id: number) => {
+  const removeMedicine = (id: number | string) => {
     setMedicines(medicines.filter(m => m.id !== id));
   };
 
-  const updateMedicine = (id: number, field: string, value: string) => {
+  const updateMedicine = (id: number | string, field: string, value: string) => {
     setMedicines(medicines.map(m => m.id === id ? { ...m, [field]: value } : m));
   };
 

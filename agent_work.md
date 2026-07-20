@@ -25,7 +25,7 @@
 - `src/app/(app)/doctor/dashboard/messages/page.tsx` & `src/components/messages/Messenger.tsx`: New files establishing the 2-column Chat UI with custom scrollbars and chat bubbles.
 - `src/app/(app)/doctor/dashboard/medicines/page.tsx` & `src/components/medicines/MedicineInventory.tsx`: Built and refactored. The data structure was changed from `{ stock, price }` to `{ company, priority }` to track preferred brands.
 
-### 4. Next Steps
+### 4. Next Steps ----
 - **Data Integration:** Wire up the mocked React states in `SmartEditorArea.tsx`, `MedicineInventory.tsx`, `ReportsDashboard.tsx`, and `Messenger.tsx` to actual backend APIs or global state management (e.g., Redux/Zustand).
 - **AI Suggestion Engine Logic:** The "AI Suggestion" button in the Medicine Builder currently inserts a static mock object. This needs to be connected to the `MedicineInventory`'s "Preferred Brands" data so the AI actually recommends the doctor's sponsored medicines.
 - **Prescription Print/Export:** The UI for the Prescription Editor is near complete, but the final `onFinalize` action needs to compile the structured data into a final A4 PDF format (via `PrescriptionPreviewModal`) for printing or sharing.
