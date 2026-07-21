@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export interface PrescriptionData {
   id?: string;
@@ -120,9 +121,43 @@ export function PrescriptionProvider({ children }: { children: ReactNode }) {
 
   // Ref to hold debounce timer for DB save
   const dbSaveTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  
+  const searchParams = useSearchParams();
+  const rawIdFromUrl = searchParams?.get('patientId') || "";
+  const pNameFromUrl = searchParams?.get('patientName') || "New Patient";
 
-  // Fetch from DB on mount
-  React.useEffect(() => {
+  // Watch URL changes and load appropriate patient data
+  useEffect(() => {
+    let rawId = rawIdFromUrl;
+    if (!rawId || rawId.includes('-')) {
+      const firstLetter = pNameFromUrl.charAt(0).toUpperCase();
+      let hash = 0;
+      for (let i = 0; i < pNameFromUrl.length; i++) hash = pNameFromUrl.charCodeAt(i) + ((hash << 5) - hash);
+      const num = Math.abs(hash).toString().padStart(6, '0');
+      rawId = `${firstLetter} ${num.slice(0,2)} ${num.slice(2,4)} ${num.slice(4,6)}`;
+    }
+
+    if (rawId && rawId !== data.patientId) {
+      // Load from local storage first to prevent UI flickering of old data
+      const savedSession = localStorage.getItem(`shustota_prescription_${rawId}`);
+      let newPatientData = { ...initialData, patientId: rawId, patientName: pNameFromUrl };
+      
+      if (savedSession) {
+        newPatientData = JSON.parse(savedSession);
+      }
+      
+      // Preserve global themes
+      const savedImage = localStorage.getItem("shustota_custom_theme");
+      const savedWatermark = localStorage.getItem("shustota_watermark");
+      if (savedImage) newPatientData.customThemeImage = savedImage;
+      if (savedWatermark) newPatientData.watermarkImage = savedWatermark;
+      
+      setData(newPatientData);
+    }
+  }, [rawIdFromUrl, pNameFromUrl]);
+
+  // Fetch from DB when patient changes
+  useEffect(() => {
     if (data.patientId) {
       fetch(`/api/prescriptions?mrn=${encodeURIComponent(data.patientId)}`)
         .then(res => res.json())
@@ -130,8 +165,10 @@ export function PrescriptionProvider({ children }: { children: ReactNode }) {
           if (json.data) {
             // DB has data, override local state
             setData(prev => {
+              // Ensure we only override if the fetched data matches current patient ID
+              if (prev.patientId !== json.data.patientId) return prev;
+              
               const merged = { ...prev, ...json.data };
-              // Ensure we don't lose local custom theme if not in DB
               if (!merged.customThemeImage) merged.customThemeImage = prev.customThemeImage;
               if (!merged.watermarkImage) merged.watermarkImage = prev.watermarkImage;
               return merged;

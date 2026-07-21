@@ -2,7 +2,6 @@
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { MouseMagneticEffect } from "@/components/landing/MouseMagneticEffect";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { TrustedBySection } from "@/components/landing/TrustedBySection";
 import { AIIntelligenceSuite } from "@/components/landing/AIIntelligenceSuite";
@@ -17,7 +16,6 @@ import { MedicalDirectory } from "@/components/landing/MedicalDirectory";
 export default function LandingPage() {
   return (
     <>
-      <MouseMagneticEffect />
       
       <div className="min-h-screen bg-white flex flex-col overflow-x-hidden w-full selection:bg-primary/20 selection:text-primary">
         <Navbar />
