@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Calendar, MapPin, User, Activity, FileText, ChevronRight, CheckCircle2, AlertCircle, Download, Clock, ChevronLeft, ChevronDown } from 'lucide-react';
 import { useDoctor } from '@/context/DoctorContext';
@@ -8,7 +8,8 @@ import { toast } from 'sonner';
 import { PatientDetailsDrawer } from '@/components/patients/PatientDetailsDrawer';
 
 export default function DoctorPatientsPage() {
-  const { patients } = useDoctor();
+  const { patients: contextPatients } = useDoctor();
+  const [patients, setPatients] = useState<any[]>(contextPatients);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [activeFilter, setActiveFilter] = useState("All");
@@ -17,6 +18,22 @@ export default function DoctorPatientsPage() {
   
   const itemsPerPage = 10;
   const filters = ["All", "Appointment", "Walk-in", "Online"];
+
+  // Fetch real patients from DB
+  useEffect(() => {
+    fetch('/api/patients')
+      .then(res => res.json())
+      .then(json => {
+        if (json.success && json.data) {
+          setPatients(prev => {
+            const dbIds = new Set(json.data.map((p: any) => p.id));
+            const filteredMock = contextPatients.filter(p => !dbIds.has(p.id));
+            return [...json.data, ...filteredMock];
+          });
+        }
+      })
+      .catch(e => console.error("Failed to load DB patients:", e));
+  }, [contextPatients]);
 
   // Filter & Sort Logic
   const filteredPatients = useMemo(() => {

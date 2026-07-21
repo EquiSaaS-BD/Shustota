@@ -182,7 +182,12 @@ export function PrescriptionProvider({ children }: { children: ReactNode }) {
   const saveToSession = (updatedData: PrescriptionData) => {
     if (typeof window !== "undefined" && updatedData.patientId) {
       try {
-        localStorage.setItem(`shustota_prescription_${updatedData.patientId}`, JSON.stringify(updatedData));
+        // Strip large base64 images before saving to avoid QuotaExceededError
+        const dataToSave = { ...updatedData };
+        delete dataToSave.customThemeImage;
+        delete dataToSave.watermarkImage;
+
+        localStorage.setItem(`shustota_prescription_${updatedData.patientId}`, JSON.stringify(dataToSave));
         // Still save globals
         if (updatedData.customThemeImage) localStorage.setItem("shustota_custom_theme", updatedData.customThemeImage);
         else localStorage.removeItem("shustota_custom_theme");
@@ -196,7 +201,7 @@ export function PrescriptionProvider({ children }: { children: ReactNode }) {
           fetch('/api/prescriptions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedData)
+            body: JSON.stringify(dataToSave)
           })
           .then(res => res.json())
           .then(resData => {
