@@ -39,27 +39,17 @@ export default function NotFound() {
         <div className="max-w-[800px] w-full z-10 flex flex-col items-center text-center">
           
           {/* Main 404 Visual */}
-          <div className="relative mb-[50px] flex items-center justify-center min-h-[280px] w-full">
-            <motion.h1 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", damping: 15, stiffness: 100 }}
-              className="text-[160px] md:text-[220px] font-black text-slate-100/70 tracking-tighter leading-none select-none absolute z-0"
-            >
-              404
-            </motion.h1>
-            
+          <div className="relative mb-[40px] flex items-center justify-center w-full mt-[20px]">
             <motion.div 
-              initial={{ y: 60, opacity: 0, scale: 0.8 }}
+              initial={{ y: 30, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
-              whileHover={{ y: -10 }}
-              transition={{ delay: 0.2, type: "spring", damping: 15 }}
-              className="z-10 relative cursor-pointer mt-4"
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="z-10 relative"
             >
               <img 
-                src="/images/doc-fun.png" 
-                alt="Funny Doctor 404" 
-                className="w-[200px] md:w-[260px] h-auto object-contain drop-shadow-[0_20px_40px_rgba(47,128,237,0.15)]"
+                src="/images/404.png.png" 
+                alt="Page Not Found Visual" 
+                className="w-full max-w-[360px] md:max-w-[480px] h-auto object-contain drop-shadow-[0_20px_40px_rgba(47,128,237,0.12)]"
               />
             </motion.div>
           </div>
