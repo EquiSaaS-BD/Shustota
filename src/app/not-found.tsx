@@ -39,30 +39,28 @@ export default function NotFound() {
         <div className="max-w-[800px] w-full z-10 flex flex-col items-center text-center">
           
           {/* Main 404 Visual */}
-          <div className="relative mb-[40px] flex items-center justify-center">
+          <div className="relative mb-[60px] flex items-center justify-center min-h-[350px] w-full">
             <motion.h1 
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", damping: 12, stiffness: 100 }}
-              className="text-[180px] md:text-[240px] font-black text-slate-100 tracking-tighter leading-none select-none"
+              className="text-[200px] md:text-[300px] font-black text-slate-100 tracking-tighter leading-none select-none absolute z-0 opacity-50"
             >
               404
             </motion.h1>
             
             <motion.div 
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+              initial={{ y: 100, opacity: 0, rotate: -15, scale: 0.5 }}
+              animate={{ y: 0, opacity: 1, rotate: 0, scale: 1 }}
+              whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.05 }}
               transition={{ delay: 0.3, type: "spring", damping: 15 }}
-              className="absolute inset-0 flex items-center justify-center"
+              className="z-10 relative cursor-pointer mt-10"
             >
-              <div className="w-[120px] h-[120px] bg-white rounded-full shadow-2xl border-4 border-primary/20 flex items-center justify-center relative">
-                <Search size={50} className="text-primary absolute" />
-                <motion.div 
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  className="w-full h-full rounded-full border-2 border-dashed border-primary/40"
-                />
-              </div>
+              <img 
+                src="/images/doc-fun.png" 
+                alt="Funny Doctor 404" 
+                className="w-[320px] md:w-[400px] h-auto object-contain drop-shadow-2xl"
+              />
             </motion.div>
           </div>
 
