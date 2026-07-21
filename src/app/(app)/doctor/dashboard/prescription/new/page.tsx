@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { PrescriptionEditorLayout } from "@/components/prescription/PrescriptionEditorLayout";
 import { PatientContextSidebar } from "@/components/prescription/PatientContextSidebar";
 import { SmartEditorArea } from "@/components/prescription/SmartEditorArea";
@@ -15,6 +16,14 @@ export default function NewPrescriptionPage() {
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"prescription" | "report">("prescription");
+
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    if (searchParams?.get('preview') === 'true') {
+      setIsPreviewModalOpen(true);
+    }
+  }, [searchParams]);
 
   return (
     <PrescriptionProvider>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, Activity, Pill, Clock, FileText } from "lucide-react";
+import { X, Calendar, Activity, Pill, Clock, FileText, Eye, Edit } from "lucide-react";
 import { useDoctor } from "@/context/DoctorContext";
 
 interface PatientDetailsDrawerProps {
@@ -112,11 +112,22 @@ export function PatientDetailsDrawer({ isOpen, onClose, patient }: PatientDetail
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-2">
                             <FileText size={16} className="text-primary" />
-                            <h4 className="font-bold text-slate-800 text-sm">{new Date(rx.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</h4>
+                            <h4 className="font-bold text-slate-800 text-sm">{new Date(rx.date || new Date()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</h4>
                           </div>
-                          <span className="px-2 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold uppercase rounded-md">
-                            {rx.medicines?.length || 0} Meds
-                          </span>
+                          <div className="flex gap-2">
+                            <a 
+                              href={`/doctor/dashboard/prescription/new?patientId=${patient.id}&patientName=${encodeURIComponent(patient.name)}&preview=true`}
+                              className="px-2.5 py-1 bg-primary/10 text-primary hover:bg-primary/20 text-[11px] font-bold uppercase rounded-md flex items-center gap-1 transition-colors"
+                            >
+                              <Eye size={12} /> View Design
+                            </a>
+                            <a 
+                              href={`/doctor/dashboard/prescription/new?patientId=${patient.id}&patientName=${encodeURIComponent(patient.name)}`}
+                              className="px-2.5 py-1 bg-slate-100 text-slate-600 hover:bg-slate-200 text-[11px] font-bold uppercase rounded-md flex items-center gap-1 transition-colors"
+                            >
+                              <Edit size={12} /> Edit
+                            </a>
+                          </div>
                         </div>
                         {rx.diagnosis && (
                           <p className="text-xs text-slate-600 mb-2 font-medium">Diagnosis: <span className="text-slate-800">{rx.diagnosis}</span></p>
@@ -149,9 +160,10 @@ export function PatientDetailsDrawer({ isOpen, onClose, patient }: PatientDetail
             <div className="p-4 border-t border-slate-100 bg-slate-50/50">
               <a 
                 href={`/doctor/dashboard/prescription/new?patientId=${patient.id}&patientName=${encodeURIComponent(patient.name)}`}
-                className="w-full flex items-center justify-center py-3 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
               >
-                Create New Prescription
+                <Edit size={18} />
+                Edit / Write Prescription
               </a>
             </div>
           </motion.div>
