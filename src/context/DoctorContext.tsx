@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { toast } from "sonner";
 
 // Types
@@ -107,11 +107,26 @@ export function DoctorProvider({ children }: { children: ReactNode }) {
   const [queue, setQueue] = useState<QueuePatient[]>(initialQueue);
   const [previousQueue, setPreviousQueue] = useState<QueuePatient[]>([]);
   
-  const [connectedAssistants, setConnectedAssistants] = useState([
-    { id: "100010001000", name: "Kamrul Hasan", status: "Online (Front Desk)", color: "text-[#22C55E]", bg: "bg-[#22C55E]", isPending: false },
-    { id: "200020002000", name: "Aisha Begum", status: "Offline (Shift ended)", color: "text-slate-400", bg: "bg-slate-200", isPending: false }
-  ]);
+  const [connectedAssistants, setConnectedAssistants] = useState<any[]>([]);
   
+  // Load assistants from local storage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('shustota_assistants');
+      if (saved) {
+        try {
+          setConnectedAssistants(JSON.parse(saved));
+        } catch (e) {}
+      }
+    }
+  }, []);
+
+  const persistAssistants = (newAssistants: any[]) => {
+    setConnectedAssistants(newAssistants);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('shustota_assistants', JSON.stringify(newAssistants));
+    }
+  };  
   const [activityLog, setActivityLog] = useState(initialActivityLog);
   const [testReports, setTestReports] = useState<Record<string, any[]>>(initialTestReports);
   const [patientPrescriptions, setPatientPrescriptions] = useState<Record<string, any[]>>({});
@@ -144,11 +159,11 @@ export function DoctorProvider({ children }: { children: ReactNode }) {
   };
 
   const addAssistant = (assistant: any) => {
-    setConnectedAssistants((prev) => [assistant, ...prev]);
+    persistAssistants([assistant, ...connectedAssistants]);
   };
 
   const removeAssistant = (id: string) => {
-    setConnectedAssistants((prev) => prev.filter(a => a.id !== id));
+    persistAssistants(connectedAssistants.filter(a => a.id !== id));
   };
 
   const addPatientToHistory = (patient: Patient) => {
