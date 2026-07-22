@@ -78,6 +78,7 @@ export function HospitalHeader({ onMenuClick }: HospitalHeaderProps) {
         {/* Notifications */}
         <div className="relative">
           <button
+            aria-label="Notifications"
             onClick={() => setShowNotifications(!showNotifications)}
             className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors relative"
           >
@@ -137,7 +138,7 @@ export function HospitalHeader({ onMenuClick }: HospitalHeaderProps) {
               Verified
             </p>
           </div>
-          <button className="flex items-center gap-1 hover:opacity-80 transition-opacity">
+          <button aria-label="Profile menu" className="flex items-center gap-1 hover:opacity-80 transition-opacity">
             <div className="w-9 h-9 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 font-bold text-sm">
               {user?.name?.charAt(0) || "H"}
             </div>

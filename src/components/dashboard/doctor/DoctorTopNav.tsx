@@ -12,7 +12,7 @@ export default function DoctorTopNav() {
         <span className="px-3 py-1 bg-[#22C55E]/10 text-[#22C55E] text-sm font-semibold rounded-full border border-[#22C55E]/20">
           Online
         </span>
-        <button className="relative p-2 text-slate-400 hover:text-[#2F80ED] transition-colors">
+        <button aria-label="Notifications" className="relative p-2 text-slate-400 hover:text-[#2F80ED] transition-colors">
           <Bell size={24} />
           <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
         </button>
@@ -25,7 +25,7 @@ export default function DoctorTopNav() {
             <Image src="/images/signup-doctor.png" alt="Doctor" fill className="object-cover" />
           </div>
         </div>
-        <button className="md:hidden text-slate-500">
+        <button aria-label="Toggle menu" className="md:hidden text-slate-500">
           <Menu size={28} />
         </button>
       </div>

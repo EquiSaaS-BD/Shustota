@@ -106,6 +106,7 @@ export default function AssistantTopNav() {
         
         <div className="relative">
           <button 
+            aria-label="Notifications"
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative p-2 text-slate-400 hover:text-assistant-primary transition-colors focus:outline-none"
           >
@@ -195,7 +196,7 @@ export default function AssistantTopNav() {
           </div>
         </div>
 
-        <button className="md:hidden text-slate-500">
+        <button aria-label="Toggle menu" className="md:hidden text-slate-500">
           <Menu size={28} />
         </button>
       </div>
