@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, Toaster } from "sonner";
-import { User, Stethoscope, Building2, CheckCircle2, Eye, EyeOff, ArrowLeft, ChevronDown } from "lucide-react";
+import { User, Stethoscope, Building2, CheckCircle2, Eye, EyeOff, ArrowLeft, ChevronDown, HelpCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 type AccountType = "patient" | "doctor" | "hospital" | "assistant" | null;
@@ -240,6 +240,11 @@ export default function RegisterPage() {
       >
         <Toaster position="top-center" />
         
+        {/* Back to Home Button */}
+        <Link href="/" className="absolute left-0 top-0 sm:top-2 p-2.5 text-slate-500 hover:text-primary bg-slate-100 hover:bg-primary/10 rounded-full transition-colors flex items-center gap-2">
+          <ArrowLeft size={20} /> <span className="hidden sm:inline font-bold text-sm">Home</span>
+        </Link>
+
         {/* Logo */}
       <Link href="/" className="mb-12">
         <Image src="/images/shustota ai logo.png" alt="Shustota AI" width={400} height={140} className="h-28 sm:h-32 w-auto object-contain" />
@@ -247,31 +252,31 @@ export default function RegisterPage() {
 
       {/* Main Container */}
       <div className="w-full max-w-[700px]">
-        {/* Goal Gradient Progress Indicator */}
-        <div className="mb-10 w-full bg-slate-100 rounded-full h-3 overflow-hidden relative">
-          <motion.div 
-            initial={{ width: "0%" }}
-            animate={{ 
-              width: step === 1 ? "35%" : step === 2 ? "75%" : "100%" 
-            }}
-            transition={{ type: "spring", stiffness: 80, damping: 15 }}
-            className="h-full bg-gradient-to-r from-primary to-[#70DE71]"
-          />
-        </div>
-        <div className="flex justify-between items-center mb-6 text-sm font-semibold text-slate-500">
-          <span>Step {step} of 3</span>
-          <span className="text-primary font-bold">
-            {step === 1 && "Choose Account Type (35% Complete)"}
-            {step === 2 && "Enter Personal Details (75% Complete - Almost there!)"}
-            {step === 3 && "Secure Your Account (100% Complete - Finish line!)"}
-          </span>
+        {/* Step Progress Indicator (1 ---- 2 ---- 3) */}
+        <div className="flex items-center justify-between w-full max-w-[400px] mx-auto mb-14 relative z-10 px-2">
+          {/* Background Line */}
+          <div className="absolute top-1/2 left-6 right-6 h-1 bg-slate-200 -z-10 -translate-y-1/2 rounded-full"></div>
+          {/* Active Line */}
+          <div className="absolute top-1/2 left-6 h-1 bg-[#70DE71] -z-10 -translate-y-1/2 transition-all duration-500 rounded-full" style={{ width: `calc(${(step - 1) * 50}%)` }}></div>
+          
+          {[1, 2, 3].map((s) => (
+            <div key={s} className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300 ${
+              step >= s 
+                ? "bg-[#70DE71] text-white shadow-[0_0_0_6px_rgba(112,222,113,0.15)]" 
+                : "bg-white text-slate-400 border-2 border-slate-200"
+            }`}>
+              {step > s ? <CheckCircle2 size={24} strokeWidth={3} className="text-white" /> : s}
+            </div>
+          ))}
         </div>
 
         <AnimatePresence mode="wait" custom={direction}>
           {/* STEP 1: WHO ARE YOU? */}
           {step === 1 && (
             <motion.div key="step1" custom={direction} variants={slideVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-center">
-              <h1 className="text-2xl font-bold text-slate-800 mb-8 uppercase tracking-wide">Step 1 - Who Are You?</h1>
+              <h1 className="text-2xl font-bold text-slate-800 mb-8 uppercase tracking-wide flex items-center gap-2">
+                <HelpCircle className="text-[#70DE71]" size={28} /> Who Are You?
+              </h1>
               
               <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-5 justify-items-center mb-10 max-w-[680px]">
                 {ACCOUNT_TYPES.map((type) => {
@@ -313,11 +318,10 @@ export default function RegisterPage() {
           {/* STEP 2: PERSONAL INFORMATION */}
           {step === 2 && (
             <motion.div key="step2" custom={direction} variants={slideVariants} initial="initial" animate="animate" exit="exit" className="w-full">
-              <div className="flex items-center mb-8 relative">
-                <button onClick={goBack} className="absolute left-0 p-2 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors">
-                  <ArrowLeft size={20} />
-                </button>
-                <h1 className="text-2xl font-bold text-slate-800 uppercase tracking-wide w-full text-center">Step 2 – Personal Information</h1>
+              <div className="flex items-center mb-8">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-800 uppercase tracking-wide w-full text-center flex items-center justify-center gap-2 whitespace-nowrap">
+                  <HelpCircle className="text-[#70DE71]" size={28} /> Personal Information
+                </h1>
               </div>
 
               <div className="grid grid-cols-2 gap-5 mb-8">
@@ -380,23 +384,30 @@ export default function RegisterPage() {
                 )}
               </div>
 
-              <button
-                onClick={goNext}
-                className="w-full h-[52px] bg-[#70DE71] hover:bg-[#5bc95c] text-white font-bold rounded-xl transition-all shadow-md active:scale-[0.98]"
-              >
-                Continue
-              </button>
+              <div className="flex gap-4">
+                <button
+                  onClick={goBack}
+                  className="w-1/3 h-[52px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all active:scale-[0.98]"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={goNext}
+                  className="w-2/3 h-[52px] bg-[#70DE71] hover:bg-[#5bc95c] text-white font-bold rounded-xl transition-all shadow-md active:scale-[0.98]"
+                >
+                  Continue
+                </button>
+              </div>
             </motion.div>
           )}
 
           {/* STEP 3: PASSWORD */}
           {step === 3 && (
             <motion.div key="step3" custom={direction} variants={slideVariants} initial="initial" animate="animate" exit="exit" className="w-full">
-              <div className="flex items-center mb-8 relative">
-                <button onClick={goBack} className="absolute left-0 p-2 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors">
-                  <ArrowLeft size={20} />
-                </button>
-                <h1 className="text-2xl font-bold text-slate-800 uppercase tracking-wide w-full text-center">Step 3 – Password</h1>
+              <div className="flex items-center mb-8">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-800 uppercase tracking-wide w-full text-center flex items-center justify-center gap-2 whitespace-nowrap">
+                  <HelpCircle className="text-[#70DE71]" size={28} /> Secure Password
+                </h1>
               </div>
 
               <div className="grid grid-cols-2 gap-5 mb-8">
@@ -431,13 +442,22 @@ export default function RegisterPage() {
                 </span>
               </label>
 
-              <button
-                onClick={handleSubmit}
-                disabled={isLoading}
-                className="w-full h-[54px] bg-[#70DE71] hover:bg-[#5bc95c] disabled:bg-[#70DE71]/70 text-white font-bold rounded-[12px] transition-all shadow-md active:scale-[0.98] flex items-center justify-center"
-              >
-                {isLoading ? <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" /> : "Create Account"}
-              </button>
+              <div className="flex gap-4">
+                <button
+                  onClick={goBack}
+                  disabled={isLoading}
+                  className="w-1/3 h-[54px] bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-700 font-bold rounded-[12px] transition-all active:scale-[0.98]"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                  className="w-2/3 h-[54px] bg-[#70DE71] hover:bg-[#5bc95c] disabled:bg-[#70DE71]/70 text-white font-bold rounded-[12px] transition-all shadow-md active:scale-[0.98] flex items-center justify-center"
+                >
+                  {isLoading ? <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" /> : "Create Account"}
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

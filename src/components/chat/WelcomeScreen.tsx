@@ -2,8 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Stethoscope, Pill, FileText, Activity, Apple, Building2, User, HeartPulse } from "lucide-react";
+import { ChatMode } from "./ChatInput";
 
-export function WelcomeScreen() {
+export function WelcomeScreen({ onSelect }: { onSelect: (mode: ChatMode) => void }) {
   const timeOfDay = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
@@ -49,6 +50,7 @@ export function WelcomeScreen() {
         {suggestions.map((item, idx) => (
           <motion.button
             key={idx}
+            onClick={() => onSelect(item)}
             whileHover={{ y: -4, scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="flex flex-col items-start justify-between w-full h-[110px] p-4 bg-white border border-slate-200 rounded-[18px] hover:border-slate-300 hover:shadow-md transition-all text-left"

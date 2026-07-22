@@ -111,16 +111,23 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
         {/* Bottom Actions (Sticky) */}
         <div className="p-3 space-y-0.5 bg-white border-t border-slate-100">
-          <Link href="/settings" className="flex items-center gap-3 w-full h-11 px-3 rounded-lg hover:bg-slate-50 text-slate-700 text-[14px] font-medium transition-colors">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white text-xs font-bold overflow-hidden relative shrink-0">
-              {user?.image ? (
-                <Image src={user.image} alt={user?.name || "User"} fill className="object-cover" />
-              ) : (
-                user?.name?.charAt(0).toUpperCase() || 'U'
-              )}
-            </div>
-            <span className="truncate">{user?.name || 'User'}</span>
-          </Link>
+          {user ? (
+            <Link href="/settings" className="flex items-center gap-3 w-full h-11 px-3 rounded-lg hover:bg-slate-50 text-slate-700 text-[14px] font-medium transition-colors">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white text-xs font-bold overflow-hidden relative shrink-0">
+                {user?.image ? (
+                  <Image src={user.image} alt={user?.name || "User"} fill className="object-cover" />
+                ) : (
+                  user?.name?.charAt(0).toUpperCase() || 'U'
+                )}
+              </div>
+              <span className="truncate">{user?.name || 'User'}</span>
+            </Link>
+          ) : (
+            <Link href="/login" className="flex items-center justify-center gap-2 w-full h-11 px-3 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[14px] font-bold transition-colors">
+              <LogOut size={16} className="rotate-180" /> 
+              Log In
+            </Link>
+          )}
           
           <Link href="/settings" className="flex items-center gap-3 w-full h-11 px-3 rounded-lg hover:bg-slate-50 text-slate-600 text-[14px] font-medium transition-colors">
             <Settings size={18} className="text-slate-500" /> Settings

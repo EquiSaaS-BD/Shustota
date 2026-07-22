@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { Sidebar } from "@/components/chat/Sidebar";
 import { ContextPanel } from "@/components/chat/ContextPanel";
-import { Menu } from "lucide-react";
+import { Menu, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { MobileBottomNav } from "@/components/shared/MobileBottomNav";
 
 export default function AppLayout({
   children,
@@ -38,15 +41,27 @@ export default function AppLayout({
         
         {/* Mobile Header (Only visible on lg and below) */}
         {!isSpecialRoute && (
-          <header className="lg:hidden h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0 z-20">
+          <header className="lg:hidden absolute top-0 left-0 right-0 h-14 bg-white/70 backdrop-blur-2xl border-b border-slate-200/50 flex items-center justify-between px-4 z-[60] shadow-sm">
             <button 
               onClick={() => setMobileMenuOpen(true)}
               className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
             >
               <Menu size={24} />
             </button>
-            <div className="font-semibold text-slate-800">Shustota AI</div>
-            <div className="w-8" /> {/* Spacer for centering */}
+            <div className="flex items-center gap-2.5 font-[900] text-slate-800 text-xl tracking-tight">
+              <div className="w-9 h-9 relative drop-shadow-sm">
+                <Image src="/images/shustota-icon.png" alt="Shustota AI" fill sizes="36px" className="object-contain" />
+              </div>
+              Shustota AI
+            </div>
+            
+            {/* Profile Link */}
+            <Link 
+              href="/settings"
+              className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white text-xs font-bold overflow-hidden border border-white/50 shadow-sm hover:scale-105 transition-transform"
+            >
+              <span className="truncate">U</span>
+            </Link>
           </header>
         )}
 
@@ -69,6 +84,9 @@ export default function AppLayout({
           </div>
         </ContextPanel>
       )}
+      
+      {/* 4. Mobile Bottom Navigation (conditional visibility inside component) */}
+      <MobileBottomNav />
       
     </div>
   );

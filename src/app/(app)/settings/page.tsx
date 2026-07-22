@@ -14,11 +14,11 @@ export default function SettingsPage() {
   // Profile State
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("+880 1870-760751");
-  const [address, setAddress] = useState("Dhaka, Bangladesh");
-  const [dob, setDob] = useState("1995-05-15");
-  const [gender, setGender] = useState("Male");
-  const [bloodGroup, setBloodGroup] = useState("O+");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("");
+  const [bloodGroup, setBloodGroup] = useState("");
   
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -26,20 +26,38 @@ export default function SettingsPage() {
   // Profile Completion Logic
   const calculateCompletion = () => {
     let score = 0;
-    if (name) score += 20;
-    if (email) score += 20;
-    if (phone) score += 15;
+    if (name?.trim()) score += 20;
+    if (email?.trim()) score += 20;
+    if (phone?.trim()) score += 15;
     if (dob) score += 15;
     if (gender) score += 10;
     if (bloodGroup) score += 10;
-    if (address) score += 10;
+    if (address?.trim()) score += 10;
     return score;
   };
   const completionPercentage = calculateCompletion();
   
+  // Dynamic color logic based on percentage
+  const getCompletionColor = (percent: number) => {
+    if (percent < 40) return "from-red-500 to-red-400"; // Red
+    if (percent < 70) return "from-orange-500 to-amber-400"; // Orange/Yellow
+    if (percent < 100) return "from-lime-500 to-green-400"; // Light Green
+    return "from-[#22C55E] to-[#10B981]"; // Brand Green
+  };
+  
+  const getCompletionBg = (percent: number) => {
+    if (percent < 40) return "from-red-500 via-red-400 to-red-500";
+    if (percent < 70) return "from-orange-500 via-amber-400 to-orange-500";
+    if (percent < 100) return "from-lime-500 via-green-400 to-lime-500";
+    return "from-[#22C55E] via-[#10B981] to-[#059669]";
+  };
+  
+  const colorClass = getCompletionColor(completionPercentage);
+  const bgClass = getCompletionBg(completionPercentage);
+  
   // Expandable sections state
   const [expandedSection, setExpandedSection] = useState<'security' | 'notifications' | 'appearance' | null>(null);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load User Data on mount
@@ -110,14 +128,14 @@ export default function SettingsPage() {
                 <p className="text-[13px] text-slate-500 font-medium mt-0.5">Please complete at least 80% to book appointments seamlessly.</p>
               </div>
               <div className="text-right">
-                <span className="text-[20px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#22C55E] to-[#10B981]">
+                <span className={`text-[20px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r ${colorClass} transition-all duration-500`}>
                   {completionPercentage}%
                 </span>
               </div>
             </div>
             <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-[#22C55E] via-[#10B981] to-[#059669] rounded-full transition-all duration-500 ease-out"
+                className={`h-full bg-gradient-to-r ${bgClass} rounded-full transition-all duration-500 ease-out`}
                 style={{ width: `${completionPercentage}%` }}
               />
             </div>

@@ -12,6 +12,7 @@ import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { SecurityAndFAQ } from "@/components/landing/SecurityAndFAQ";
 import { FinalCTASection } from "@/components/landing/FinalCTASection";
 import { MedicalDirectory } from "@/components/landing/MedicalDirectory";
+import { MedicineMarqueeSection } from "@/components/landing/MedicineMarqueeSection";
 
 export default function LandingPage() {
   return (
@@ -29,6 +30,7 @@ export default function LandingPage() {
           <AIIntelligenceSuite />
           <DashboardPreview />
           <MedicalDirectory />
+          <MedicineMarqueeSection />
           
           <HowItWorksSection />
           <TestimonialsSection />

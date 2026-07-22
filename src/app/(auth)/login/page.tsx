@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Fingerprint, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Fingerprint, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { toast, Toaster } from "sonner";
@@ -89,8 +89,18 @@ export default function LoginPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-full max-w-[460px] flex flex-col items-center justify-center"
+        className="w-full max-w-[460px] flex flex-col items-center justify-center relative"
       >
+        {/* Back Button */}
+        <div className="w-full flex justify-start mb-6">
+          <button 
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-semibold transition-colors bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full"
+          >
+            <ArrowLeft size={18} /> Back
+          </button>
+        </div>
+
         {/* Logo */}
         <Link href="/" className="mb-8">
           <Image src="/images/shustota ai logo.png" alt="Shustota AI" width={400} height={140} className="h-24 sm:h-28 w-auto object-contain" />

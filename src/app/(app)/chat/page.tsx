@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { WelcomeScreen } from "@/components/chat/WelcomeScreen";
-import { ChatInput } from "@/components/chat/ChatInput";
+import { ChatInput, ChatMode } from "@/components/chat/ChatInput";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
@@ -17,6 +17,7 @@ type Message = {
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [selectedMode, setSelectedMode] = useState<ChatMode | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -28,7 +29,19 @@ export default function ChatPage() {
   }, [messages, isTyping]);
 
   const handleSend = (text: string) => {
-    const newMsg: Message = { id: Date.now().toString(), role: "user", content: text };
+    let finalContent = text.trim();
+    if (selectedMode) {
+      if (finalContent) {
+        finalContent = `[Action: ${selectedMode.title}]\n\n${finalContent}`;
+      } else {
+        finalContent = `[Action: ${selectedMode.title}]`;
+      }
+      setSelectedMode(null);
+    }
+
+    if (!finalContent) return;
+
+    const newMsg: Message = { id: Date.now().toString(), role: "user", content: finalContent };
     setMessages(prev => [...prev, newMsg]);
     setIsTyping(true);
 
@@ -69,7 +82,7 @@ export default function ChatPage() {
         <div className="max-w-[900px] mx-auto w-full px-4 md:px-8">
           
           {messages.length === 0 ? (
-            <WelcomeScreen />
+            <WelcomeScreen onSelect={(mode) => setSelectedMode(mode)} />
           ) : (
             <div className="flex flex-col space-y-2 mt-4 md:mt-8 pb-10">
               {messages.map((msg) => (
@@ -134,7 +147,11 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area */}
-      <ChatInput onSend={handleSend} />
+      <ChatInput 
+        onSend={handleSend} 
+        selectedMode={selectedMode} 
+        onSelectMode={setSelectedMode}
+      />
     </div>
   );
 }
