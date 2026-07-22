@@ -145,10 +145,10 @@ export function MedicineInventory() {
                   </div>
 
                   <div className="w-[10%] flex items-center justify-end gap-2">
-                    <button className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-[#2F80ED] hover:bg-blue-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                    <button aria-label="Edit medicine" className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-[#2F80ED] hover:bg-blue-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
                       <Edit2 size={16} />
                     </button>
-                    <button className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                    <button aria-label="Delete medicine" className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
                       <Trash2 size={16} />
                     </button>
                   </div>
