@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MedicineBuilder } from "./MedicineBuilder";
 import { PatientContextSidebar } from "./PatientContextSidebar";
 import { usePrescription } from "@/context/PrescriptionContext";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Loader2 } from "lucide-react";
 
 interface SmartEditorAreaProps {
   onFinalize: () => void;
@@ -12,6 +12,14 @@ interface SmartEditorAreaProps {
 
 export function SmartEditorArea({ onFinalize }: SmartEditorAreaProps) {
   const { data, updateData, updateVitals } = usePrescription();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const appendToState = (field: keyof typeof data, newText: string) => {
     const currentVal = data[field] as string;
@@ -35,7 +43,61 @@ export function SmartEditorArea({ onFinalize }: SmartEditorAreaProps) {
   return (
     <div className="flex flex-col h-auto xl:h-full bg-white relative">
       <div className="flex-1 overflow-visible xl:overflow-y-auto custom-scrollbar p-5 lg:p-6">
-        <div className="w-full flex flex-col gap-5">
+        
+        {isLoading ? (
+          <div className="w-full flex flex-col gap-5 animate-in fade-in duration-500">
+            {/* Patient Info Header Skeleton */}
+            <div className="w-full h-[140px] bg-slate-50 border border-slate-100 rounded-[12px] shadow-sm animate-pulse p-4 flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-slate-200 rounded-full shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="w-1/3 h-5 bg-slate-200 rounded-md" />
+                  <div className="w-1/4 h-4 bg-slate-100 rounded-md" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <div className="w-20 h-6 bg-slate-200 rounded-md" />
+                <div className="w-24 h-6 bg-slate-200 rounded-md" />
+              </div>
+            </div>
+
+            {/* Text Area Skeleton 1 */}
+            <div className="w-full min-h-[100px] p-4 bg-white border border-slate-100 rounded-[12px] shadow-sm flex flex-col gap-3 animate-pulse">
+              <div className="w-40 h-5 bg-slate-100 rounded-md" />
+              <div className="w-full h-4 bg-slate-50 rounded-md mt-2" />
+              <div className="w-3/4 h-4 bg-slate-50 rounded-md" />
+            </div>
+
+            {/* Text Area Skeleton 2 */}
+            <div className="w-full min-h-[120px] p-4 bg-white border border-slate-100 rounded-[12px] shadow-sm flex flex-col gap-3 animate-pulse">
+              <div className="w-36 h-5 bg-slate-100 rounded-md" />
+              <div className="w-full h-4 bg-slate-50 rounded-md mt-2" />
+              <div className="w-full h-4 bg-slate-50 rounded-md" />
+              <div className="w-1/2 h-4 bg-slate-50 rounded-md" />
+            </div>
+
+            {/* Vitals Grid Skeleton */}
+            <div className="w-full p-4 bg-white border border-slate-100 rounded-[12px] shadow-sm flex flex-col gap-4 animate-pulse">
+              <div className="w-32 h-5 bg-slate-100 rounded-md" />
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <div key={i} className="bg-slate-50 border border-slate-100 rounded-[10px] p-3 flex flex-col gap-2 h-[72px]">
+                    <div className="w-16 h-3 bg-slate-200 rounded-md" />
+                    <div className="w-12 h-5 bg-slate-200 rounded-md" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Meds Skeleton */}
+            <div className="w-full min-h-[160px] p-4 bg-white border border-slate-100 rounded-[12px] shadow-sm flex flex-col gap-3 animate-pulse">
+              <div className="w-32 h-5 bg-slate-100 rounded-md" />
+              <div className="w-full h-12 bg-slate-50 rounded-lg mt-2" />
+              <div className="w-full h-12 bg-slate-50 rounded-lg" />
+            </div>
+          </div>
+        ) : (
+          <div className="w-full flex flex-col gap-5 animate-in fade-in duration-500">
           
           {/* Patient Info Header */}
           <PatientContextSidebar isDesktop={false} />
@@ -210,6 +272,7 @@ export function SmartEditorArea({ onFinalize }: SmartEditorAreaProps) {
           </div>
 
         </div>
+        )}
       </div>
     </div>
   );

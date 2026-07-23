@@ -7,5 +7,9 @@ export const metadata: Metadata = {
 };
 
 export default function MessagesPage() {
-  return <Messenger />;
+  return (
+    <div className="h-[calc(100dvh-144px)] lg:h-[calc(100dvh-64px)] w-full -mt-0">
+      <Messenger />
+    </div>
+  );
 }

@@ -98,10 +98,10 @@ export default function DoctorDashboardPage() {
   };
 
   return (
-    <div className="p-4 lg:p-6 space-y-6 bg-slate-50 min-h-[calc(100vh-80px)] w-full max-w-[1600px] mx-auto overflow-y-auto">
+    <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 bg-slate-50 min-h-full w-full max-w-[1600px] mx-auto">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-2">
-        <h1 className="text-[24px] font-bold text-slate-800">Live Monitor & Team Dashboard</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-2">
+        <h1 className="text-[20px] lg:text-[24px] font-bold text-slate-800">Live Monitor & Team Dashboard</h1>
         <div className="flex gap-4">
           <div className="px-4 py-2 bg-white rounded-full shadow-sm flex items-center gap-2 border border-slate-100">
             <span className="w-2.5 h-2.5 bg-[#22C55E] rounded-full animate-pulse"></span>
@@ -138,7 +138,7 @@ export default function DoctorDashboardPage() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="xl:col-span-2 bg-white rounded-[20px] shadow-sm border border-slate-100 p-6 lg:p-8 flex flex-col gap-8"
+          className="xl:col-span-2 bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 lg:p-8 flex flex-col gap-6 lg:gap-8"
         >
           <div className="flex justify-between items-end">
             <div className="w-full">
@@ -156,12 +156,17 @@ export default function DoctorDashboardPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Current Patient */}
-            <div className="bg-[#F7FAFC] p-6 rounded-[16px] border border-slate-100 relative overflow-hidden group flex flex-col justify-between h-full">
+            <div 
+              onClick={() => {
+                if (queue[0]) {
+                  window.location.href = `/doctor/dashboard/prescription/new?patientName=${encodeURIComponent(queue[0].name || "")}&patientId=${queue[0].token || ""}&appointmentTime=10:00+AM`;
+                }
+              }}
+              className="bg-[#F7FAFC] p-6 rounded-[16px] border border-slate-100 relative overflow-hidden group flex flex-col justify-between h-full cursor-pointer hover:border-[#2F80ED]/30 hover:shadow-md transition-all"
+            >
               <div>
                 <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Link href={`/doctor/dashboard/prescription/new?patientName=${encodeURIComponent(queue[0]?.name || "")}&patientId=${queue[0]?.token || ""}&appointmentTime=10:00+AM`}>
-                    <button className="text-[12px] bg-[#6DDA6E] text-white shadow-sm px-4 py-1.5 rounded-full font-bold hover:bg-[#5bc95c] transition-colors">Start Consultation</button>
-                  </Link>
+                  <button className="text-[12px] bg-[#6DDA6E] text-white shadow-sm px-4 py-1.5 rounded-full font-bold hover:bg-[#5bc95c] transition-colors">Start Consultation</button>
                 </div>
                 <span className="text-[14px] text-slate-500 font-semibold uppercase tracking-wider flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#2F80ED] animate-pulse"></span>
@@ -181,7 +186,10 @@ export default function DoctorDashboardPage() {
               
               <div className="mt-6 pt-5 border-t border-slate-200 flex gap-3">
                 <button 
-                  onClick={handleUndoPatient}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUndoPatient();
+                  }}
                   disabled={previousQueue.length === 0}
                   title="Undo Call Next"
                   className="w-[60px] h-[52px] shrink-0 bg-[#F59E0B]/10 hover:bg-[#F59E0B] text-[#D97706] hover:text-white border border-[#F59E0B]/30 font-bold rounded-xl flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed"
@@ -189,11 +197,14 @@ export default function DoctorDashboardPage() {
                   <Undo2 size={20} />
                 </button>
                 <button 
-                  onClick={handleNextPatient}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNextPatient();
+                  }}
                   disabled={queue.length === 0}
                   className="flex-1 bg-[#2F80ED] hover:bg-[#2563EB] text-white font-bold h-[52px] rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <CheckCircle2 size={20} /> Complete & Call Next
+                  <CheckCircle2 size={20} /> Call Next
                 </button>
               </div>
             </div>
@@ -297,8 +308,8 @@ export default function DoctorDashboardPage() {
 
       {/* Assistant Activity Log */}
       <h2 className="text-[20px] font-bold text-slate-800 pt-4">Live Assistant Activity Log</h2>
-      <div className="w-full bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden">
-        <div className="h-[400px] overflow-y-auto custom-scrollbar">
+      <div className="w-full bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden relative">
+        <div className="h-[400px] overflow-auto custom-scrollbar">
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead className="sticky top-0 bg-slate-50/90 backdrop-blur-md z-10 border-b border-slate-200">
               <tr className="text-[13px] text-slate-500 font-semibold h-[50px] uppercase tracking-wider">

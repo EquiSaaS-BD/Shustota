@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Maximize,
   Minimize,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -50,7 +51,7 @@ export function DoctorHeader({ onMenuClick }: DoctorHeaderProps) {
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-4 lg:px-6 shrink-0 z-30">
+    <header className="h-16 bg-white/60 backdrop-blur-xl border-b border-slate-200/80 flex items-center justify-between px-4 lg:px-6 shrink-0 w-full shadow-sm">
       {/* Left: Mobile menu + Search */}
       <div className="flex items-center gap-3 flex-1">
         <button
@@ -134,19 +135,25 @@ export function DoctorHeader({ onMenuClick }: DoctorHeaderProps) {
           {/* Notification Dropdown */}
           {showNotifications && (
             <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden z-50">
-                <div className="px-4 py-3 border-b border-slate-100">
-                  <h4 className="text-sm font-semibold text-slate-800">Notifications</h4>
+              <div className="fixed inset-0 z-40 sm:z-40" onClick={() => setShowNotifications(false)} />
+              <div className="fixed inset-0 z-[99999] bg-slate-50 flex flex-col h-[100dvh] sm:h-auto sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 sm:bg-white/60 sm:backdrop-blur-xl sm:rounded-xl sm:shadow-[0_8px_32px_rgba(0,0,0,0.12)] border-0 sm:border sm:border-white/60 overflow-hidden sm:z-50 animate-in slide-in-from-bottom-2 sm:slide-in-from-top-2 duration-200">
+                <div className="px-4 py-4 sm:py-3 border-b border-slate-200 sm:border-white/50 bg-white sm:bg-white/30 flex items-center justify-between shrink-0">
+                  <h4 className="text-lg sm:text-sm font-bold text-slate-800">Notifications</h4>
+                  <button 
+                    onClick={() => setShowNotifications(false)}
+                    className="sm:hidden p-2 -mr-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
                 </div>
-                <div className="max-h-64 overflow-y-auto">
+                <div className="flex-1 sm:max-h-64 overflow-y-auto custom-scrollbar">
                   {notifications.map((n) => (
                     <div
                       key={n.id}
-                      className={`px-4 py-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors cursor-pointer ${n.unread ? "bg-blue-50/30" : ""}`}
+                      className={`px-4 py-4 sm:py-3 border-b border-slate-100 sm:border-white/20 last:border-0 hover:bg-slate-100 sm:hover:bg-white/40 transition-colors cursor-pointer ${n.unread ? "bg-blue-50/50 sm:bg-white/30 shadow-sm" : "bg-white sm:bg-transparent"}`}
                     >
-                      <p className="text-[13px] text-slate-700">{n.text}</p>
-                      <p className="text-[11px] text-slate-400 mt-1">{n.time}</p>
+                      <p className="text-[14px] sm:text-[13px] font-medium text-slate-800">{n.text}</p>
+                      <p className="text-[12px] sm:text-[11px] font-bold text-[#2F80ED] sm:text-slate-600 mt-1">{n.time}</p>
                     </div>
                   ))}
                 </div>

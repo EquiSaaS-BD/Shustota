@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Sparkles, Send, Mic, Copy, Check, X, ShieldAlert, BookOpen, Stethoscope, FileText, Activity, AlertCircle, PlusCircle, ArrowRight } from "lucide-react";
+import { Sparkles, Send, Mic, Copy, Check, X, ShieldAlert, BookOpen, Stethoscope, FileText, Activity, AlertCircle, PlusCircle, ArrowRight, ArrowUp } from "lucide-react";
 import { toast } from "sonner";
 
 interface Message {
@@ -83,19 +83,26 @@ export function AIAssistancePanel() {
   };
 
   return (
-    <div className="flex flex-col min-h-[500px] xl:h-full bg-transparent rounded-[16px] xl:rounded-none border border-[#E5E7EB] xl:border-none shadow-[0_4px_16px_rgba(15,23,42,0.08)] xl:shadow-none overflow-hidden relative">
+    <div className="flex flex-col h-full bg-transparent rounded-[16px] xl:rounded-none border border-[#E5E7EB] xl:border-none shadow-[0_4px_16px_rgba(15,23,42,0.08)] xl:shadow-none overflow-hidden relative">
       
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-4 text-white flex items-center justify-between shrink-0 shadow-sm z-10">
-        <div className="flex items-center gap-2">
-          <Sparkles size={18} className="text-yellow-300" />
-          <h3 className="font-bold text-[15px]">Clinical Copilot</h3>
+      <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-5 py-3.5 flex items-center justify-between shrink-0 z-10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center shadow-sm">
+            <Sparkles size={16} className="text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-[15px] text-slate-800 leading-tight">Clinical Copilot</h3>
+            <p className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#6DDA6E] inline-block animate-pulse"></span>
+              AI Active
+            </p>
+          </div>
         </div>
-        <span className="bg-white/20 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">Active</span>
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 overflow-visible xl:overflow-y-auto custom-scrollbar p-5 flex flex-col gap-6 bg-transparent">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 flex flex-col gap-6 bg-transparent min-h-0">
         {messages.length === 0 ? (
           /* Default State */
           <div className="flex flex-col items-center justify-center h-full text-center mt-4">
@@ -198,11 +205,11 @@ export function AIAssistancePanel() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Persistent Input Box */}
-      <div className="p-4 bg-white border-t border-slate-100 z-10 shrink-0">
+      {/* Input Area */}
+      <div className="p-4 pb-8 xl:pb-4 bg-white border-t border-slate-200 mt-auto shrink-0 z-10 sticky bottom-0" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)' }}>
         <div className="relative flex items-center">
-          <button className="absolute left-3 text-slate-400 hover:text-slate-600 transition-colors">
-            <Mic size={20} />
+          <button className="absolute left-2 w-9 h-9 flex items-center justify-center text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-colors z-10">
+            <Mic size={18} />
           </button>
           <input
             type="text"
@@ -210,14 +217,14 @@ export function AIAssistancePanel() {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend(inputValue)}
             placeholder="Ask Copilot (e.g. Check interactions...)"
-            className="w-full bg-slate-50 border border-slate-200 rounded-[12px] py-3 pl-10 pr-12 text-[14px] text-slate-800 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/10 transition-all placeholder:text-slate-400 font-medium"
+            className="w-full h-[48px] bg-slate-100/50 hover:bg-slate-100 focus:bg-white border border-slate-200/60 rounded-full py-2 pl-12 pr-14 text-[14px] text-slate-800 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/10 transition-all placeholder:text-slate-400 font-medium shadow-sm"
           />
           <button 
             onClick={() => handleSend(inputValue)}
             disabled={!inputValue.trim()}
-            className="absolute right-2 bg-purple-500 hover:bg-purple-600 disabled:bg-slate-300 text-white w-8 h-8 rounded-[8px] flex items-center justify-center transition-colors"
+            className="absolute right-1.5 bg-slate-800 hover:bg-slate-900 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:hover:scale-100 disabled:shadow-none text-white w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm z-10"
           >
-            <Send size={16} />
+            <ArrowUp size={18} strokeWidth={2.5} />
           </button>
         </div>
       </div>
