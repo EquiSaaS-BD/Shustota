@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useDoctor } from "@/context/DoctorContext";
 import { usePrescription } from "@/context/PrescriptionContext";
 import { toast } from "sonner";
+import { createPortal } from "react-dom";
 
 interface PrescriptionFinalizeModalProps {
   isOpen: boolean;
@@ -16,8 +17,11 @@ export function PrescriptionFinalizeModal({ isOpen, onClose }: PrescriptionFinal
   const searchParams = useSearchParams();
   const { addPatientToHistory, addPrescriptionToPatient } = useDoctor();
   const { data } = usePrescription();
-  
-  if (!isOpen) return null;
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleFinalize = () => {
     const pName = searchParams?.get('patientName') || "New Patient";
@@ -57,14 +61,17 @@ export function PrescriptionFinalizeModal({ isOpen, onClose }: PrescriptionFinal
     router.push("/doctor/dashboard/patients");
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="bg-slate-100 w-full max-w-4xl h-full max-h-[80vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+      {isOpen && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-0 sm:p-6 bg-slate-900/40 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          className="bg-slate-100 w-full max-w-4xl h-[100dvh] sm:h-full sm:max-h-[80vh] rounded-none sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden"
         >
           {/* Header */}
           <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0">
@@ -136,7 +143,7 @@ export function PrescriptionFinalizeModal({ isOpen, onClose }: PrescriptionFinal
                 </button>
                 <button 
                   onClick={onClose}
-                  className="w-full py-3.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors text-base"
+                  className="w-full py-3.5 rounded-xl font-bold text-amber-600 bg-white border-2 border-amber-500/80 hover:bg-amber-50 transition-colors text-base"
                 >
                   Keep Editing
                 </button>
@@ -144,7 +151,9 @@ export function PrescriptionFinalizeModal({ isOpen, onClose }: PrescriptionFinal
             </div>
           </div>
         </motion.div>
-      </div>
-    </AnimatePresence>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 }

@@ -21,7 +21,7 @@ export function PrescriptionTopbar({ onFinalize, onPreview, activeTab = "prescri
   const clinicName = "ABC Medical Center"; // Mock context
 
   return (
-    <div className="bg-white border-b border-slate-200 px-4 md:px-6 py-3 min-h-[72px] flex flex-col md:flex-row items-center justify-between shrink-0 shadow-sm z-30 gap-4 md:gap-0">
+    <div className="bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 md:px-6 py-3 min-h-[72px] flex flex-col md:flex-row items-center justify-between shrink-0 shadow-sm z-30 gap-4 md:gap-0 relative">
       
       {/* Left Section - Title */}
       <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { DoctorSidebar } from "@/components/doctor/DoctorSidebar";
 import { DoctorHeader } from "@/components/doctor/DoctorHeader";
+import { DoctorMobileBottomNav } from "@/components/doctor/DoctorMobileBottomNav";
 import { AccessDeniedModal } from "@/components/doctor/AccessDeniedModal";
 import { DoctorDashboardSkeleton } from "@/components/doctor/DoctorDashboardSkeleton";
 import { DoctorProvider } from "@/context/DoctorContext";
@@ -48,16 +49,19 @@ export default function DoctorDashboardLayout({
         <DoctorSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col h-full overflow-hidden">
-          {/* Header */}
-          {!isPrescriptionEditor && (
-            <DoctorHeader onMenuClick={() => setSidebarOpen(true)} />
-          )}
-
-          {/* Page Content */}
-          <main className="flex-1 overflow-y-auto">
+        <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+          
+          {/* Page Content (Scrolls behind header) */}
+          <main className="flex-1 overflow-y-auto pb-[80px] lg:pb-0 pt-16">
             {children}
           </main>
+          
+          {/* Header (Absolute floating on top) */}
+          <div className="absolute top-0 left-0 w-full z-30">
+            <DoctorHeader onMenuClick={() => setSidebarOpen(true)} />
+          </div>
+          
+          <DoctorMobileBottomNav />
         </div>
       </div>
     </DoctorProvider>

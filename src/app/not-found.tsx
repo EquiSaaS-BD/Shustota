@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Search, Home, Activity, Stethoscope } from 'lucide-react';
+import { Search, Home, Activity, Stethoscope, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -83,11 +83,11 @@ export default function NotFound() {
               Back to Home
             </button>
             <button
-              onClick={() => router.push('/doctors')}
+              onClick={() => router.back()}
               className="w-full sm:w-auto px-[32px] h-[56px] bg-white text-slate-700 rounded-[16px] font-bold text-[16px] border-[2px] border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center justify-center gap-[12px] group"
             >
-              <Stethoscope size={20} className="text-slate-400 group-hover:text-primary transition-colors" />
-              Find a Doctor
+              <ArrowLeft size={20} className="text-slate-400 group-hover:-translate-x-1 transition-transform" />
+              Go Back
             </button>
           </motion.div>
 

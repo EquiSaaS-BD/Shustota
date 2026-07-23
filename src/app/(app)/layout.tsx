@@ -86,7 +86,7 @@ export default function AppLayout({
       )}
       
       {/* 4. Mobile Bottom Navigation (conditional visibility inside component) */}
-      <MobileBottomNav />
+      {!isSpecialRoute && <MobileBottomNav />}
       
     </div>
   );

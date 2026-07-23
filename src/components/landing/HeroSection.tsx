@@ -9,55 +9,17 @@ import { useLanguage } from "@/context/LanguageContext";
 export function HeroSection() {
   const { t } = useLanguage();
 
-  const video1Ref = useRef<HTMLVideoElement>(null);
-  const video2Ref = useRef<HTMLVideoElement>(null);
-  const [activeVideo, setActiveVideo] = useState<1 | 2>(1);
-
-  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    const video = e.currentTarget;
-    const duration = video.duration;
-    const currentTime = video.currentTime;
-    
-    // Crossfade 1.5 seconds before the video ends
-    // This creates a 100% seamless loop without any black frames or stutter
-    if (duration > 0 && duration - currentTime < 1.5) {
-      if (activeVideo === 1 && video2Ref.current && video2Ref.current.paused) {
-        video2Ref.current.currentTime = 0;
-        video2Ref.current.play().catch(() => {});
-        setActiveVideo(2);
-      } else if (activeVideo === 2 && video1Ref.current && video1Ref.current.paused) {
-        video1Ref.current.currentTime = 0;
-        video1Ref.current.play().catch(() => {});
-        setActiveVideo(1);
-      }
-    }
-  };
-
   return (
     <>
       <section className="relative h-screen min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-black">
         {/* Background Video (Seamless Crossfade System) */}
         <div className="absolute inset-0 z-0 w-full h-full pointer-events-none">
-          <video
-            ref={video1Ref}
-            src="/videos/Langing-page-video.mp4"
-            autoPlay
-            muted
-            playsInline
-            onTimeUpdate={activeVideo === 1 ? handleTimeUpdate : undefined}
-            className={`absolute inset-0 w-full h-full object-cover contrast-[1.1] saturate-[1.1] brightness-[1.1] transition-opacity duration-[1500ms] ${
-              activeVideo === 1 ? "opacity-100" : "opacity-0"
-            }`}
-          />
-          <video
-            ref={video2Ref}
-            src="/videos/Langing-page-video.mp4"
-            muted
-            playsInline
-            onTimeUpdate={activeVideo === 2 ? handleTimeUpdate : undefined}
-            className={`absolute inset-0 w-full h-full object-cover contrast-[1.1] saturate-[1.1] brightness-[1.1] transition-opacity duration-[1500ms] ${
-              activeVideo === 2 ? "opacity-100" : "opacity-0"
-            }`}
+          <img
+            src="/Landing_page.gif"
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover contrast-[1.1] saturate-[1.1] brightness-[1.1]"
           />
           {/* Soft gradient at the bottom to blend with the next section seamlessly */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black" />

@@ -22,6 +22,7 @@ import {
   ChevronLeft,
   Menu,
   X,
+  Stethoscope,
 } from "lucide-react";
 
 interface DoctorSidebarProps {
@@ -29,15 +30,35 @@ interface DoctorSidebarProps {
   onClose: () => void;
 }
 
-const navItems = [
-  { label: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
-  { label: "Patient List", href: "/doctor/dashboard/patients", icon: Users },
-  { label: "Appointments", href: "/doctor/dashboard/appointments", icon: CalendarDays },
-  { label: "Prescriptions", href: "/doctor/dashboard/prescription", icon: ClipboardList },
-  { label: "Reports & Diagnostics", href: "/doctor/dashboard/reports", icon: FileBarChart },
-  { label: "Medicine Inventory", href: "/doctor/dashboard/medicines", icon: Pill },
-  { label: "Messages", href: "/doctor/dashboard/messages", icon: MessageSquare },
-  { label: "Settings", href: "/doctor/settings", icon: Settings },
+const navCategories = [
+  {
+    title: "Overview",
+    items: [
+      { label: "Dashboard", href: "/doctor/dashboard", icon: LayoutDashboard },
+    ]
+  },
+  {
+    title: "Clinical",
+    items: [
+      { label: "Appointments", href: "/doctor/dashboard/appointments", icon: CalendarDays },
+      { label: "Prescriptions", href: "/doctor/dashboard/prescription", icon: ClipboardList },
+      { label: "Patient List", href: "/doctor/dashboard/patients", icon: Users },
+      { label: "Reports & Diagnostics", href: "/doctor/dashboard/reports", icon: FileBarChart },
+    ]
+  },
+  {
+    title: "Management",
+    items: [
+      { label: "Medicine Inventory", href: "/doctor/dashboard/medicines", icon: Pill },
+      { label: "Messages", href: "/doctor/dashboard/messages", icon: MessageSquare },
+    ]
+  },
+  {
+    title: "System",
+    items: [
+      { label: "Settings", href: "/doctor/settings", icon: Settings },
+    ]
+  }
 ];
 
 export function DoctorSidebar({ isOpen, onClose }: DoctorSidebarProps) {
@@ -85,8 +106,8 @@ export function DoctorSidebar({ isOpen, onClose }: DoctorSidebarProps) {
         </button>
 
         {/* Logo Section */}
-        <div className={`h-16 px-4 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} border-b border-slate-100 shrink-0`}>
-          <Link href="/doctor/dashboard" className={`flex items-center gap-2.5 ${isCollapsed ? 'justify-center' : ''}`}>
+        <div className={`h-16 px-4 flex items-center ${isCollapsed ? 'lg:justify-center justify-between' : 'justify-between'} border-b border-slate-100 shrink-0`}>
+          <Link href="/doctor/dashboard" className={`flex items-center gap-2.5 ${isCollapsed ? 'lg:justify-center' : ''}`}>
             <Image
               src="/images/shustota icon.png"
               alt="Shustota AI"
@@ -94,12 +115,10 @@ export function DoctorSidebar({ isOpen, onClose }: DoctorSidebarProps) {
               height={36}
               className="rounded-lg shrink-0"
             />
-            {!isCollapsed && (
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-[18px] font-bold text-slate-800 tracking-tight">Shustota</span>
-                <span className="text-[9px] font-bold text-[#2F80ED] bg-[#2F80ED]/10 px-1.5 py-0.5 rounded-full uppercase tracking-wider">Doctor</span>
-              </div>
-            )}
+            <div className={`flex items-baseline gap-1.5 ${isCollapsed ? 'lg:hidden' : 'block'}`}>
+              <span className="text-[18px] font-bold text-slate-800 tracking-tight">Shustota</span>
+              <span className="text-[9px] font-bold text-[#2F80ED] bg-[#2F80ED]/10 px-1.5 py-0.5 rounded-full uppercase tracking-wider">Doctor</span>
+            </div>
           </Link>
           <button
             onClick={onClose}
@@ -110,68 +129,71 @@ export function DoctorSidebar({ isOpen, onClose }: DoctorSidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 scrollbar-thin">
-          {navItems.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                className={`
-                  doctor-sidebar-item flex items-center gap-3 py-2.5 rounded-xl text-[13.5px] font-medium
-                  ${isCollapsed ? 'justify-center px-0' : 'px-3'}
-                  ${active
-                    ? "bg-primary/8 text-primary active"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
-                  }
-                `}
-                title={isCollapsed ? item.label : undefined}
-              >
-                <item.icon size={18} strokeWidth={active ? 2.2 : 1.8} className="shrink-0" />
-                {!isCollapsed && <span className="flex-1">{item.label}</span>}
-                {!isCollapsed && active && <ChevronRight size={14} className="opacity-50" />}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin">
+          {navCategories.map((category, idx) => (
+            <div key={idx} className="space-y-1">
+              <div className={`px-3 pb-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider ${isCollapsed ? 'lg:hidden' : 'block'}`}>
+                {category.title}
+              </div>
+              {category.items.map((item) => {
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onClose}
+                    className={`
+                      doctor-sidebar-item flex items-center gap-3 py-2.5 rounded-xl text-[13.5px] font-medium
+                      ${isCollapsed ? 'lg:justify-center lg:px-0 px-3' : 'px-3'}
+                      ${active
+                        ? "bg-primary/8 text-primary active"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+                      }
+                    `}
+                    title={isCollapsed ? item.label : undefined}
+                  >
+                    <item.icon size={18} strokeWidth={active ? 2.2 : 1.8} className="shrink-0" />
+                    <span className={`flex-1 ${isCollapsed ? 'lg:hidden' : 'block'}`}>{item.label}</span>
+                    {active && <ChevronRight size={14} className={`opacity-50 ${isCollapsed ? 'lg:hidden' : 'block'}`} />}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         {/* Bottom Section */}
         <div className="px-3 pb-4 space-y-2 shrink-0 border-t border-slate-100 pt-3">
           {/* Doctor Access Badge */}
-          {!isCollapsed && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg">
-              <Lock size={13} className="text-slate-400" />
-              <span className="text-[11px] text-slate-500 font-medium">Doctor Access Only</span>
-            </div>
-          )}
+          <div className={`flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg ${isCollapsed ? 'lg:hidden' : 'block'}`}>
+            <Lock size={13} className="text-slate-400" />
+            <span className="text-[11px] text-slate-500 font-medium">Doctor Access Only</span>
+          </div>
 
           {/* Logout */}
           <button
             onClick={logout}
             className={`flex items-center gap-3 py-2.5 rounded-xl text-[13.5px] font-medium text-red-500 hover:bg-red-50 transition-colors w-full mb-4
-              ${isCollapsed ? 'justify-center px-0' : 'px-3'}
+              ${isCollapsed ? 'lg:justify-center lg:px-0 px-3' : 'px-3'}
             `}
             title={isCollapsed ? "Logout" : undefined}
           >
             <LogOut size={18} strokeWidth={1.8} className="shrink-0" />
-            {!isCollapsed && <span>Logout</span>}
+            <span className={`${isCollapsed ? 'lg:hidden' : 'block'}`}>Logout</span>
           </button>
           
-          {/* Doctor Profile (Moved to bottom) */}
-          <div className={`flex items-center gap-3 bg-gradient-to-r from-primary/5 to-blue-50 rounded-xl ${isCollapsed ? 'p-1.5 justify-center' : 'p-3'}`}>
+          {/* Doctor Profile */}
+          <div className={`flex items-center gap-3 bg-gradient-to-r from-primary/5 to-blue-50 rounded-xl ${isCollapsed ? 'lg:p-1.5 lg:justify-center p-3' : 'p-3'}`}>
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
               {user?.name?.charAt(0) || "D"}
             </div>
-            {!isCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 truncate">{user?.name || "Doctor"}</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <ShieldCheck size={12} className="text-emerald-500" />
-                  <span className="text-[11px] text-emerald-600 font-medium">Verified Doctor</span>
-                </div>
+            <div className={`flex-1 min-w-0 ${isCollapsed ? 'lg:hidden' : 'block'}`}>
+              <p className="text-sm font-semibold text-slate-800 truncate">{user?.name || "Doctor"}</p>
+              <div className="flex items-center gap-1 mt-0.5">
+                <ShieldCheck size={12} className="text-emerald-500" />
+                <span className="text-[11px] text-emerald-600 font-medium">Verified Doctor</span>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </aside>

@@ -37,11 +37,13 @@ export default function NewPrescriptionPage() {
           />
         }
         editor={
-          activeTab === "prescription" ? (
-            <SmartEditorArea onFinalize={() => setIsFinalizeModalOpen(true)} />
-          ) : (
-            <TestReportViewer />
-          )
+          <div key={activeTab} className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
+            {activeTab === "prescription" ? (
+              <SmartEditorArea onFinalize={() => setIsFinalizeModalOpen(true)} />
+            ) : (
+              <TestReportViewer />
+            )}
+          </div>
         }
         aiPanel={<AIAssistancePanel />}
       />
